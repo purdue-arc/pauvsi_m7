@@ -1,5 +1,5 @@
 ## PAUVSI-M7
-#The full ROS package for our quadrotor's software. Contains CV, Trajectory, Control, and Driver software for a autonomous flight.
+The full ROS package for our quadrotor's software. Contains CV, Trajectory, Control, and Driver software for a autonomous flight.
 
 #src/Utilities
 This contains driver software for sensors such as our camera's
