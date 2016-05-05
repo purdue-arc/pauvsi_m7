@@ -4,6 +4,7 @@
 
 int connectCamera();
 void getParameters();
+int setImageSettings(int x_offset, int y_offset, int width, int height, FlyCapture2::PixelFormat pixelForm, FlyCapture2::Mode mode);
 
 #define DEFAULT_RATE 10
 
@@ -101,6 +102,23 @@ int connectCamera()
 	}
 
 	return true;
+}
+
+int setImageSettings(int x_offset, int y_offset, int width, int height, FlyCapture2::PixelFormat pixelForm, FlyCapture2::Mode mode)
+{
+	int retVal = 1;
+
+	FlyCapture2::Format7ImageSettings imageSettings;
+
+	//setup the image settings for camera upload
+	imageSettings.height = height;
+	imageSettings.width = width;
+	imageSettings.offsetX = x_offset;
+	imageSettings.offsetY = y_offset;
+	imageSettings.mode = mode;
+	imageSettings.pixelFormat = pixelForm;
+
+	return retVal;
 }
 
 
