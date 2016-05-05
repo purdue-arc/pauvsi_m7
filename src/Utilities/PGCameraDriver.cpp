@@ -2,54 +2,31 @@
 #include <ros/console.h>
 #include <flycapture/FlyCapture2.h>
 
+int connectCamera();
+void getParameters();
+
 #define DEFAULT_RATE 10
+
+int rate;
+int serial;
+
+FlyCapture2::Error error;
+FlyCapture2::Camera camera;
+FlyCapture2::CameraInfo camInfo;
+FlyCapture2::BusManager busMngr;
 
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "CameraDriver", ros::init_options::AnonymousName); // initializes with a randomish name
 	ros::NodeHandle nh; // create the node handler
 
-	int rate;
-	ros::param::param<int>("frame_rate", rate, DEFAULT_RATE);
-	ros::Rate loop_rate(rate);
-
-	//setup camera
-	FlyCapture2::Error error;
-	FlyCapture2::Camera camera;
-	FlyCapture2::CameraInfo camInfo;
+	getParameters(); // set all params
 
 	// Connect the camera
-	{
-		error = camera.Connect( 0 );
-		if ( error != FlyCapture2::PGRERROR_OK )
-		{
-			ROS_INFO("Failed to connect to camera\n");
-			return false;
-		}
+	connectCamera();
 
-		// Get the camera info and print it out
-		error = camera.GetCameraInfo( &camInfo );
-		if ( error != FlyCapture2::PGRERROR_OK )
-		{
-			ROS_INFO("Failed to get camera info from camera\n");
-			return false;
-		}
-
-		std::cout << "Model: " << camInfo.modelName << std::endl;
-
-		error = camera.StartCapture();
-		if ( error == FlyCapture2::PGRERROR_ISOCH_BANDWIDTH_EXCEEDED )
-		{
-			ROS_INFO("Bandwidth exceeded\n");
-			return false;
-		}
-		else if ( error != FlyCapture2::PGRERROR_OK )
-		{
-			ROS_INFO("Failed to start image capture\n");
-			return false;
-		}
-	}
-
+	//set the rate
+	ros::Rate loop_rate(rate);
 	//the main loop
 	while(nh.ok())
 	{
@@ -58,7 +35,72 @@ int main(int argc, char **argv)
 		loop_rate.sleep();
 	}
 
+	//disconnect the camera
+	camera.Disconnect();
+
 	return 0;
+}
+
+void getParameters()
+{
+	//get the parameters
+	//rate
+	ros::param::param<int>("frame_rate", rate, DEFAULT_RATE);
+	ROS_INFO("Camera Frame Rate: %i", rate);
+	//serial
+	ros::param::param<int>("serial_number", serial, 0);
+}
+
+int connectCamera()
+{
+	FlyCapture2::PGRGuid guid; //id of the camera
+	//get the camera with specific serial
+	error = busMngr.GetCameraFromSerialNumber(serial, &guid);
+	if(error != FlyCapture2::PGRERROR_OK)
+	{
+		ROS_ERROR("Cannot find camera with specified serial number!");
+		error = camera.Connect( 0 ); // connect to default cam index 0
+	}
+	else
+	{
+		error = camera.Connect(&guid);
+	}
+
+	if ( error != FlyCapture2::PGRERROR_OK )
+	{
+		ROS_INFO("Failed to connect to camera\n");
+		return false;
+	}
+
+	// Get the camera info and print it out
+	error = camera.GetCameraInfo( &camInfo );
+	if ( error != FlyCapture2::PGRERROR_OK )
+	{
+		ROS_INFO("Failed to get camera info from camera\n");
+		return false;
+	}
+	std::string tempStr = std::string();
+	ROS_INFO_STREAM(camInfo.modelName);
+	ROS_INFO_STREAM(camInfo.sensorInfo);
+	ROS_INFO("%i", camInfo.serialNumber);
+
+	error = camera.StartCapture();
+	if ( error == FlyCapture2::PGRERROR_ISOCH_BANDWIDTH_EXCEEDED )
+	{
+		ROS_INFO("Bandwidth exceeded\n");
+		return false;
+	}
+	else if ( error != FlyCapture2::PGRERROR_OK )
+	{
+		ROS_INFO("Failed to start image capture\n");
+		return false;
+	}
+	else if (error == FlyCapture2::PGRERROR_OK)
+	{
+		ROS_INFO("Started the image capture");
+	}
+
+	return true;
 }
 
 
