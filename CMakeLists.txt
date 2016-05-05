@@ -19,7 +19,17 @@ if(NOT POINTGREY_LIB)
   include_directories(${POINTGREY_INCLUDE_DIR})  
 endif()
 
+catkin_package(
+
+)
+
+include_directories(
+	${catkin_INCLUDE_DIRS}
+)
+
 add_executable(cameraDriver src/Utilities/PGCameraDriver.cpp)
 target_link_libraries(cameraDriver ${POINTGREY_LIB} ${catkin_LIBRARIES})
+
+
 
 
