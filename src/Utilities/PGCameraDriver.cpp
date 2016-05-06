@@ -7,7 +7,7 @@
 
 int connectCamera();
 void getParameters();
-int setImageSettings(int x_offset, int y_offset, int width, int height, FlyCapture2::PixelFormat pixelForm, FlyCapture2::Mode mode);
+bool setImageSettings(int x_offset, int y_offset, int width, int height, FlyCapture2::PixelFormat pixelForm, FlyCapture2::Mode mode);
 bool setProperty(const FlyCapture2::PropertyType &type, const bool &autoSet, unsigned int &valueA, unsigned int &valueB);
 bool adjustCameraSettings(int cameType);
 
@@ -135,7 +135,7 @@ int connectCamera()
 	return true;
 }
 
-int setImageSettings(int x_offset, int y_offset, int width, int height, FlyCapture2::PixelFormat pixelForm, FlyCapture2::Mode mode)
+bool setImageSettings(int x_offset, int y_offset, int width, int height, FlyCapture2::PixelFormat pixelForm, FlyCapture2::Mode mode)
 {
 	bool retVal = true;
 
@@ -215,7 +215,10 @@ bool setProperty(const FlyCapture2::PropertyType type, const bool autoSet, unsig
 		prop.valueB = valueB;
 		error = camera.SetProperty(&prop);
 		//handle error
-		//TODO
+		if(error != FlyCapture2::PGRERROR_OK)
+		{
+			ROS_ERROR("Failed to set parameter");
+		}
 
 		// Read back setting to confirm
 		error = camera.GetProperty(&prop);
@@ -243,12 +246,26 @@ bool adjustCameraSettings(int cameType)
 	{
 		ROS_INFO("Adjusting camera settings for 13S2C camera");
 		//set exposure
-		setProperty(FlyCapture2::AUTO_EXPOSURE, true, 1, 1);
+		setProperty(FlyCapture2::AUTO_EXPOSURE, true, 1, 0);
+		//set gain
+		setProperty(FlyCapture2::GAIN, true, 1, 0);
+		//set shutter
+		setProperty(FlyCapture2::SHUTTER, true, 1, 0);
+		//set frame rate
+		setProperty(FlyCapture2::FRAME_RATE, false, rate, 0);
 	}
 	else if(camType == CAM_13Y3C)
 	{
 		ROS_INFO("Adjusting camera settings for 13Y3C camera");
 		//set exposure
-		setProperty(FlyCapture2::AUTO_EXPOSURE, true, 1, 1);
+		setProperty(FlyCapture2::AUTO_EXPOSURE, true, 1, 0);
+		//set gain
+		setProperty(FlyCapture2::GAIN, true, 1, 0);
+		//set shutter
+		setProperty(FlyCapture2::SHUTTER, true, 1, 0);
+		//set frame rate
+		setProperty(FlyCapture2::FRAME_RATE, false, rate, 0);
+		//TODO
+		//set the white balance and gamma of this cam
 	}
 }
