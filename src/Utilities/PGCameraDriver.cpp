@@ -8,6 +8,7 @@
 int connectCamera();
 void getParameters();
 int setImageSettings(int x_offset, int y_offset, int width, int height, FlyCapture2::PixelFormat pixelForm, FlyCapture2::Mode mode);
+bool setProperty(const FlyCapture2::PropertyType &type, const bool &autoSet, unsigned int &valueA, unsigned int &valueB);
 
 #define DEFAULT_RATE 10
 
@@ -128,7 +129,7 @@ int connectCamera()
 
 int setImageSettings(int x_offset, int y_offset, int width, int height, FlyCapture2::PixelFormat pixelForm, FlyCapture2::Mode mode)
 {
-	int retVal = 1;
+	bool retVal = true;
 
 	FlyCapture2::Format7ImageSettings imageSettings;
 
@@ -151,13 +152,78 @@ int setImageSettings(int x_offset, int y_offset, int width, int height, FlyCaptu
 	error = camera.SetFormat7Configuration(&imageSettings, packetInfo.recommendedBytesPerPacket);
 	if(error == FlyCapture2::PGRERROR_OK)
 	{
-		retVal = 1;
+		retVal = true;
 		ROS_INFO("Set the format 7 camera settings specified.");
 	}
 	else
 	{
-		retVal = 0;
+		retVal = false;
 		ROS_ERROR("FAILED TO SET CAMERA'S FORMAT 7 SETTINGS!");
+	}
+
+	return retVal;
+}
+
+bool setProperty(const FlyCapture2::PropertyType &type, const bool &autoSet, unsigned int &valueA, unsigned int &valueB)
+{
+	// return true if we can set values as desired.
+	bool retVal = true;
+
+	FlyCapture2::PropertyInfo pInfo;
+	pInfo.type = type;
+	error = camera.GetPropertyInfo(&pInfo);
+	//handle the error
+	//TODO
+
+	if(pInfo.present)
+	{
+		FlyCapture2::Property prop;
+		prop.type = type;
+		prop.autoManualMode = (autoSet && pInfo.autoSupported);
+		prop.absControl = false;
+		prop.onOff = pInfo.onOffSupported;
+
+		if(valueA < pInfo.min)
+		{
+			valueA = pInfo.min;
+			retVal &= false;
+		}
+		else if(valueA > pInfo.max)
+		{
+			valueA = pInfo.max;
+			retVal &= false;
+		}
+		if(valueB < pInfo.min)
+		{
+			valueB = pInfo.min;
+			retVal &= false;
+		}
+		else if(valueB > pInfo.max)
+		{
+			valueB = pInfo.max;
+			retVal &= false;
+		}
+		prop.valueA = valueA;
+		prop.valueB = valueB;
+		error = camera.SetProperty(&prop);
+		//handle error
+		//TODO
+
+		// Read back setting to confirm
+		error = camera.GetProperty(&prop);
+		//handle error
+		//TODO
+
+		if(!prop.autoManualMode)
+		{
+			valueA = prop.valueA;
+			valueB = prop.valueB;
+		}
+	}
+	else     // Not supported
+	{
+		valueA = 0;
+		valueB = 0;
 	}
 
 	return retVal;
