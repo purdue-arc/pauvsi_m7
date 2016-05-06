@@ -1,6 +1,9 @@
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <flycapture/FlyCapture2.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <iostream>
 
 int connectCamera();
 void getParameters();
@@ -31,6 +34,25 @@ int main(int argc, char **argv)
 	//the main loop
 	while(nh.ok())
 	{
+		//capture the raw image from cam
+		FlyCapture2::Image rawImage;
+		error = camera.RetrieveBuffer( &rawImage );
+		if ( error != FlyCapture2::PGRERROR_OK )
+		{
+			ROS_WARN("Capture Error");
+			continue;
+		}
+
+		// convert to rgb
+		FlyCapture2::Image bgrImage;
+		rawImage.Convert( FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage );
+
+		// convert to OpenCV Mat
+		unsigned int rowBytes = (double)bgrImage.GetReceivedDataSize()/(double)bgrImage.GetRows();
+		cv::Mat image = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(),rowBytes);
+
+		cv::imshow("image", image);
+		cv::waitKey(30);
 
 		//SLEEP
 		loop_rate.sleep();
@@ -117,6 +139,26 @@ int setImageSettings(int x_offset, int y_offset, int width, int height, FlyCaptu
 	imageSettings.offsetY = y_offset;
 	imageSettings.mode = mode;
 	imageSettings.pixelFormat = pixelForm;
+
+	bool isValid;
+	FlyCapture2::Format7PacketInfo packetInfo;
+	error = camera.ValidateFormat7Settings(&imageSettings, &isValid, &packetInfo);
+	if(!isValid)
+	{
+		ROS_WARN("Format 7 Settings Not Valid For Camera! (continuing)");
+	}
+
+	error = camera.SetFormat7Configuration(&imageSettings, packetInfo.recommendedBytesPerPacket);
+	if(error == FlyCapture2::PGRERROR_OK)
+	{
+		retVal = 1;
+		ROS_INFO("Set the format 7 camera settings specified.");
+	}
+	else
+	{
+		retVal = 0;
+		ROS_ERROR("FAILED TO SET CAMERA'S FORMAT 7 SETTINGS!");
+	}
 
 	return retVal;
 }
