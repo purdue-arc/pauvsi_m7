@@ -9,11 +9,15 @@ int connectCamera();
 void getParameters();
 int setImageSettings(int x_offset, int y_offset, int width, int height, FlyCapture2::PixelFormat pixelForm, FlyCapture2::Mode mode);
 bool setProperty(const FlyCapture2::PropertyType &type, const bool &autoSet, unsigned int &valueA, unsigned int &valueB);
+bool adjustCameraSettings(int cameType);
 
 #define DEFAULT_RATE 10
+#define CAM_13Y3C 2
+#define CAM_13S2C 1
 
 int rate;
 int serial;
+int camType;
 
 FlyCapture2::Error error;
 FlyCapture2::Camera camera;
@@ -29,6 +33,8 @@ int main(int argc, char **argv)
 
 	// Connect the camera
 	connectCamera();
+	//adjust cam settings for best performance
+	adjustCameraSettings(camType);
 
 	//set the rate
 	ros::Rate loop_rate(rate);
@@ -73,6 +79,8 @@ void getParameters()
 	ROS_INFO("Camera Frame Rate: %i", rate);
 	//serial
 	ros::param::param<int>("serial_number", serial, 0);
+	//cam type
+	ros::param::param<int>("camera_type", camType, 1);
 }
 
 int connectCamera()
@@ -164,7 +172,7 @@ int setImageSettings(int x_offset, int y_offset, int width, int height, FlyCaptu
 	return retVal;
 }
 
-bool setProperty(const FlyCapture2::PropertyType &type, const bool &autoSet, unsigned int &valueA, unsigned int &valueB)
+bool setProperty(const FlyCapture2::PropertyType type, const bool autoSet, unsigned int valueA, unsigned int valueB)
 {
 	// return true if we can set values as desired.
 	bool retVal = true;
@@ -229,4 +237,18 @@ bool setProperty(const FlyCapture2::PropertyType &type, const bool &autoSet, uns
 	return retVal;
 }
 
-
+bool adjustCameraSettings(int cameType)
+{
+	if(camType == CAM_13S2C)
+	{
+		ROS_INFO("Adjusting camera settings for 13S2C camera");
+		//set exposure
+		setProperty(FlyCapture2::AUTO_EXPOSURE, true, 1, 1);
+	}
+	else if(camType == CAM_13Y3C)
+	{
+		ROS_INFO("Adjusting camera settings for 13Y3C camera");
+		//set exposure
+		setProperty(FlyCapture2::AUTO_EXPOSURE, true, 1, 1);
+	}
+}
