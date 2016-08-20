@@ -100,7 +100,7 @@ int connectCamera()
 
 	if ( error != FlyCapture2::PGRERROR_OK )
 	{
-		ROS_INFO("Failed to connect to camera\n");
+		ROS_ERROR("Failed to connect to camera\n");
 		return false;
 	}
 
@@ -108,7 +108,7 @@ int connectCamera()
 	error = camera.GetCameraInfo( &camInfo );
 	if ( error != FlyCapture2::PGRERROR_OK )
 	{
-		ROS_INFO("Failed to get camera info from camera\n");
+		ROS_ERROR("Failed to get camera info from camera\n");
 		return false;
 	}
 	std::string tempStr = std::string();
@@ -119,12 +119,12 @@ int connectCamera()
 	error = camera.StartCapture();
 	if ( error == FlyCapture2::PGRERROR_ISOCH_BANDWIDTH_EXCEEDED )
 	{
-		ROS_INFO("Bandwidth exceeded\n");
+		ROS_WARN("Bandwidth exceeded\n");
 		return false;
 	}
 	else if ( error != FlyCapture2::PGRERROR_OK )
 	{
-		ROS_INFO("Failed to start image capture\n");
+		ROS_ERROR("Failed to start image capture\n");
 		return false;
 	}
 	else if (error == FlyCapture2::PGRERROR_OK)
