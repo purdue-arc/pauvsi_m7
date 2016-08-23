@@ -71,6 +71,8 @@ int main(int argc, char **argv)
 		unsigned int rowBytes = (double)bgrImage.GetReceivedDataSize()/(double)bgrImage.GetRows();
 		cv::Mat raw_image = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(),rowBytes);
 
+		ROS_DEBUG("Image size: %i, %i", raw_image.cols, raw_image.rows);
+
 		//show the unaltered image
 		//cv::imshow("image", raw_image);
 		//cv::waitKey(30);
