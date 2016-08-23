@@ -3,7 +3,11 @@
 #include <flycapture/FlyCapture2.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <image_transport/image_transport.h>
+#include <cv_bridge/cv_bridge.h>
 #include <iostream>
+
+using std::string;
 
 int connectCamera();
 void getParameters();
@@ -18,6 +22,7 @@ bool adjustCameraSettings(int cameType);
 int rate;
 int serial;
 int camType;
+string messagePrefix;
 
 FlyCapture2::Error error;
 FlyCapture2::Camera camera;
@@ -30,11 +35,16 @@ int main(int argc, char **argv)
 	ros::NodeHandle nh; // create the node handler
 
 	getParameters(); // set all params
+	ROS_DEBUG("Params %i, %i, %i", rate, serial, camType);
 
 	// Connect the camera
 	connectCamera();
 	//adjust cam settings for best performance
 	adjustCameraSettings(camType);
+
+	//setup publishers
+	image_transport::ImageTransport it(nh);
+	image_transport::Publisher rawColorPub = it.advertise("camera/image", 1);
 
 	//set the rate
 	ros::Rate loop_rate(rate);
@@ -50,16 +60,24 @@ int main(int argc, char **argv)
 			continue;
 		}
 
-		// convert to rgb
+		// convert to bgr
 		FlyCapture2::Image bgrImage;
 		rawImage.Convert( FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage );
 
 		// convert to OpenCV Mat
 		unsigned int rowBytes = (double)bgrImage.GetReceivedDataSize()/(double)bgrImage.GetRows();
-		cv::Mat image = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(),rowBytes);
+		cv::Mat raw_image = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(),rowBytes);
 
-		cv::imshow("image", image);
+		//show the unaltered image
+		cv::imshow("image", raw_image);
 		cv::waitKey(30);
+
+		//check if a topic has subscribers then send is message
+		// raw color publisher
+		if (rawColorPub.getNumSubscribers() > 0)
+		{
+
+		}
 
 		//SLEEP
 		loop_rate.sleep();
@@ -75,12 +93,15 @@ void getParameters()
 {
 	//get the parameters
 	//rate
-	ros::param::param<int>("frame_rate", rate, DEFAULT_RATE);
+	ros::param::param<int>("~frame_rate", rate, DEFAULT_RATE);
 	ROS_INFO("Camera Frame Rate: %i", rate);
 	//serial
-	ros::param::param<int>("serial_number", serial, 0);
+	ros::param::param<int>("~serial_number", serial, 0);
+	ROS_INFO("Driver using %i as serial number", serial);
 	//cam type
-	ros::param::param<int>("camera_type", camType, 1);
+	ros::param::param<int>("~camera_type", camType, 1);
+	//camerPos
+	ros::param::param<string>("~camera_position", messagePrefix, "unknown");
 }
 
 int connectCamera()
@@ -90,7 +111,7 @@ int connectCamera()
 	error = busMngr.GetCameraFromSerialNumber(serial, &guid);
 	if(error != FlyCapture2::PGRERROR_OK)
 	{
-		ROS_ERROR("Cannot find camera with specified serial number!");
+		ROS_ERROR("Cannot find camera with specified serial number! - %i", serial);
 		error = camera.Connect( 0 ); // connect to default cam index 0
 	}
 	else
