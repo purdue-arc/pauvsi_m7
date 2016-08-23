@@ -3,6 +3,6 @@
   	<param name="frame_rate" value="100" />
   	<param name="serial_number" value="15374828" />
   	<param name="camera_type" value="2" />
-  	<param name="camera_position" value="bottom" />
+  	<param name="camera_position" value="bottomCam" />
   </node>
 </launch>

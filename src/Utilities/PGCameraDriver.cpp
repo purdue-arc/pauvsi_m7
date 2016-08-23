@@ -44,7 +44,10 @@ int main(int argc, char **argv)
 
 	//setup publishers
 	image_transport::ImageTransport it(nh);
-	image_transport::Publisher rawColorPub = it.advertise("camera/image", 1);
+	string topicName = "";
+	topicName = messagePrefix;
+	topicName += "/color_distort";
+	image_transport::Publisher rawColorPub = it.advertise(topicName, 1);
 
 	//set the rate
 	ros::Rate loop_rate(rate);
@@ -69,14 +72,16 @@ int main(int argc, char **argv)
 		cv::Mat raw_image = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(),rowBytes);
 
 		//show the unaltered image
-		cv::imshow("image", raw_image);
-		cv::waitKey(30);
+		//cv::imshow("image", raw_image);
+		//cv::waitKey(30);
 
 		//check if a topic has subscribers then send is message
 		// raw color publisher
 		if (rawColorPub.getNumSubscribers() > 0)
 		{
-
+			//create the image message and publish it
+			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", raw_image).toImageMsg();
+			rawColorPub.publish(msg);
 		}
 
 		//SLEEP
