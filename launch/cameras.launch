@@ -4,7 +4,7 @@
   	<param name="serial_number" value="15374828" />
   	<param name="camera_type" value="2" />
   	<param name="camera_position" value="bottomCam" />
-  	<param name="crop_x" value="1000" />
-  	<param name="crop_y" value="1000" />
+  	<param name="crop_x" value="640" />
+  	<param name="crop_y" value="640" />
   </node>
 </launch>
