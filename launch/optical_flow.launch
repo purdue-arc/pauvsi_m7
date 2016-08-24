@@ -1,5 +1,20 @@
 <launch>
 
+	<node name="bottomCamera" pkg="PAUVSI-M7" type="cameraDriver" output="screen">
 	
+  		<param name="frame_rate" value="100" />
+  		<param name="serial_number" value="15374828" />
+  		<param name="camera_type" value="2" />
+  		<param name="camera_position" value="bottomCam" />
+  		<param name="crop_x" value="640" />
+  		<param name="crop_y" value="640" />
+  		
+  	</node>
+  	
+  	<node name="ptam" pkg="ptam" type="ptam" clear_params="true" output="screen">
+	    <remap from="image" to="/bottomCam/mono_distorted" />
+        <remap from="pose" to="pose"/>
+	    <rosparam file="$(find PAUVSI-M7)/params/PtamFixParams-13Y3C.yaml"/>
+    </node>
   
 </launch>
