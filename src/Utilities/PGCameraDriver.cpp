@@ -6,6 +6,7 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <iostream>
+#include <math.h>
 
 using std::string;
 
@@ -18,11 +19,15 @@ bool adjustCameraSettings(int cameType);
 #define DEFAULT_RATE 10
 #define CAM_13Y3C 2
 #define CAM_13S2C 1
+#define CAM_13Y3C_CROPX 1000
+#define CAM_13Y3C_CROPY 1000
 
 int rate;
 int serial;
 int camType;
 string messagePrefix;
+int OFCropX;
+int OFCropY;
 
 FlyCapture2::Error error;
 FlyCapture2::Camera camera;
@@ -45,9 +50,14 @@ int main(int argc, char **argv)
 	//setup publishers
 	image_transport::ImageTransport it(nh);
 	string topicName = "";
-	topicName = messagePrefix;
-	topicName += "/color_distort";
-	image_transport::Publisher rawColorPub = it.advertise(topicName, 1);
+
+	image_transport::Publisher rawMonoPub;
+	if(camType == CAM_13Y3C)
+	{
+		topicName = messagePrefix;
+		topicName += "/mono_distorted";
+		rawMonoPub = it.advertise(topicName, 1);
+	}
 
 	//set the rate
 	ros::Rate loop_rate(rate);
@@ -78,12 +88,23 @@ int main(int argc, char **argv)
 		//cv::waitKey(30);
 
 		//check if a topic has subscribers then send is message
-		// raw color publisher
-		if (rawColorPub.getNumSubscribers() > 0)
+		// raw mono publisher for 13Y3C
+		if (camType == CAM_13Y3C && rawMonoPub.getNumSubscribers() > 0)
 		{
 			//create the image message and publish it
-			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", raw_image).toImageMsg();
-			rawColorPub.publish(msg);
+			cv::Mat monoImage;
+			//convert image to grayscale
+			cvtColor(raw_image, monoImage, CV_BGR2GRAY);
+			//crop the image for ptam
+			cv::Rect roi(round(double(monoImage.cols - CAM_13Y3C_CROPX) / 2.0), round(double(monoImage.rows - CAM_13Y3C_CROPY) / 2.0), CAM_13Y3C_CROPX, CAM_13Y3C_CROPY);
+			//create image from rect
+			monoImage = monoImage(roi);
+			//resize the image
+			cv::Size newSize(OFCropX, OFCropY);
+			cv::resize(monoImage, monoImage, newSize);
+			//create and publish
+			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", monoImage).toImageMsg();
+			rawMonoPub.publish(msg);
 		}
 
 		//SLEEP
@@ -109,6 +130,10 @@ void getParameters()
 	ros::param::param<int>("~camera_type", camType, 1);
 	//camerPos
 	ros::param::param<string>("~camera_position", messagePrefix, "unknown");
+	//size to crop ptam image by
+	ros::param::param<int>("~crop_x", OFCropX, 640);
+	ros::param::param<int>("~crop_y", OFCropY, 640);
+	ROS_INFO("Cropping image to %i X %i", OFCropX, OFCropY);
 }
 
 int connectCamera()
