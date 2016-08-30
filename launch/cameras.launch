@@ -1,5 +1,5 @@
 <launch>
-  <node name="bottomCamera" pkg="PAUVSI-M7" type="cameraDriver" output="screen">
+  <node name="bottomCamera" pkg="pauvsi_m7" type="cameraDriver" output="screen">
   	<param name="frame_rate" value="100" />
   	<param name="serial_number" value="15374828" />
   	<param name="camera_type" value="2" />
