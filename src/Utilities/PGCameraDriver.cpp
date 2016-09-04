@@ -49,7 +49,9 @@ int main(int argc, char **argv)
 	adjustCameraSettings(camType);
 
 	//setup publishers and transports
-	image_transport::ImageTransport it(nh);
+	image_transport::ImageTransport it1(nh);
+	image_transport::ImageTransport it2(nh);
+	image_transport::ImageTransport it3(nh);
 	string topicName = "";
 
 	image_transport::Publisher rawMonoPub;
@@ -58,20 +60,20 @@ int main(int argc, char **argv)
 		topicName = "PGCameraDriver/";
 		topicName += messagePrefix;
 		topicName += "/mono/cropped";
-		rawMonoPub = it.advertise(topicName, 1);
+		rawMonoPub = it1.advertise(topicName, 1);
 	}
 
 	image_transport::Publisher undistortedColorPub;
 	topicName = "PGCameraDriver/";
 	topicName += messagePrefix;
 	topicName += "/color/undistorted";
-	undistortedColorPub = it.advertise(topicName, 1);
+	undistortedColorPub = it2.advertise(topicName, 1);
 
 	image_transport::Publisher undistortedMonoPub;
 	topicName = "PGCameraDriver/";
 	topicName += messagePrefix;
 	topicName += "/mono/undistorted";
-	undistortedMonoPub = it.advertise(topicName, 1);
+	undistortedMonoPub = it3.advertise(topicName, 1);
 
 	//set the rate
 	ros::Rate loop_rate(rate);
