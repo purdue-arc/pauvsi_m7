@@ -19,6 +19,7 @@ bool adjustCameraSettings(int cameType);
 #define DEFAULT_RATE 10
 #define CAM_13Y3C 2
 #define CAM_13S2C 1
+//These are for removing the unilluminated pixels from the shot
 #define CAM_13Y3C_CROPX 1000
 #define CAM_13Y3C_CROPY 1000
 
@@ -47,17 +48,30 @@ int main(int argc, char **argv)
 	//adjust cam settings for best performance
 	adjustCameraSettings(camType);
 
-	//setup publishers
+	//setup publishers and transports
 	image_transport::ImageTransport it(nh);
 	string topicName = "";
 
 	image_transport::Publisher rawMonoPub;
 	if(camType == CAM_13Y3C)
 	{
-		topicName = messagePrefix;
-		topicName += "/mono_distorted";
+		topicName = "PGCameraDriver/";
+		topicName += messagePrefix;
+		topicName += "/mono/cropped";
 		rawMonoPub = it.advertise(topicName, 1);
 	}
+
+	image_transport::Publisher undistortedColorPub;
+	topicName = "PGCameraDriver/";
+	topicName += messagePrefix;
+	topicName += "/color/undistorted";
+	undistortedColorPub = it.advertise(topicName, 1);
+
+	image_transport::Publisher undistortedMonoPub;
+	topicName = "PGCameraDriver/";
+	topicName += messagePrefix;
+	topicName += "/mono/undistorted";
+	undistortedMonoPub = it.advertise(topicName, 1);
 
 	//set the rate
 	ros::Rate loop_rate(rate);
@@ -105,6 +119,25 @@ int main(int argc, char **argv)
 			//create and publish
 			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", monoImage).toImageMsg();
 			rawMonoPub.publish(msg);
+		}
+
+		//undistorted color publisher
+		if(undistortedColorPub.getNumSubscribers() > 0)
+		{
+			//create and publish
+			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", raw_image).toImageMsg();
+			undistortedColorPub.publish(msg);
+		}
+
+		//undistorted color publisher
+		if(undistortedMonoPub.getNumSubscribers() > 0)
+		{
+			cv::Mat monoImage;
+			//convert image to grayscale
+			cvtColor(raw_image, monoImage, CV_BGR2GRAY);
+			//create and publish
+			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", monoImage).toImageMsg();
+			undistortedMonoPub.publish(msg);
 		}
 
 		//SLEEP
