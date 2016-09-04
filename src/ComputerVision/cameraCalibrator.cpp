@@ -7,6 +7,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
 
+using namespace cv;
+
 int n_boards = 0;  //Number of snapshots of the chessboard
 int frame_step;   //Frames to be skipped
 int board_w;   //Enclosed corners horizontally on the chessboard
@@ -85,10 +87,10 @@ int main(int argc, char **argv)
 	cv::Size board_sz = cv::Size(numCornersHor, numCornersVer);
 	//cv::VideoCapture capture = cv::VideoCapture(0);
 
-	std::vector<std::vector<cv::Point3d> > object_points;
-	std::vector<std::vector<cv::Point2d> > image_points;
+	std::vector<std::vector<cv::Point3f> > object_points;
+	std::vector<std::vector<cv::Point2f> > image_points;
 
-	std::vector<cv::Point2d> corners;
+	std::vector<cv::Point2f> corners;
 	int successes=0;
 
 	cv::Mat image;
@@ -99,9 +101,11 @@ int main(int argc, char **argv)
 	image = imageMat;
 	//image = captureFrame();
 
-	std::vector<cv::Point3d> obj;
+	vector<Point3f> obj;
 	for(int j=0;j<numSquares;j++)
-		obj.push_back(cv::Point3d(j/numCornersHor, j%numCornersHor, 0.0f));
+	{
+		obj.push_back(Point3f(j/numCornersHor, j%numCornersHor, 0.0f));
+	}
 
 	//cv::imshow("test", imageMat);
 	//cv::waitKey(30);
@@ -109,6 +113,8 @@ int main(int argc, char **argv)
 	while(successes<numBoards && nh.ok())
 	{
 		cvtColor(image, gray_image, CV_BGR2GRAY);
+
+
 
 		bool found = cv::findChessboardCorners(image, board_sz, corners, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
 
