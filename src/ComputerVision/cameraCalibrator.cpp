@@ -174,7 +174,14 @@ int main(int argc, char **argv)
 	std::cout << "Distortion = " << distCoeffs << std::endl << std::endl;
 	//imwrite("calibration/Instrinsics.xml", intrinsic);
 	//imwrite("calibration/Distortion.xml", distCoeffs);
+	ROS_INFO("SAVING AS FILE...");
+	FileStorage fsi("intrinsic.xml", FileStorage::WRITE);
+	fsi << "intrinsic" << intrinsic;
+	FileStorage fsd("distortion.xml", FileStorage::WRITE);
+	fsd << "distortion" << distCoeffs;
 
+	fsi.release();
+	fsd.release();
 
 	cv::Mat imageUndistorted;
 	while(nh.ok())
