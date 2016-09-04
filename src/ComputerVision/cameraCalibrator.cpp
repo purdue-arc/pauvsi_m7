@@ -14,7 +14,6 @@ int board_h;   //Enclosed corners vertically on the chessboard
 
 image_transport::Subscriber imageSub;
 cv::Mat imageMat;
-ros::NodeHandle nh;
 bool imageSet = false;
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
@@ -50,7 +49,7 @@ IplImage* captureFrame()
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "CameraCalibrator", ros::init_options::AnonymousName); // initializes with a randomish name
-	//ros::NodeHandle nh; // create the node handler
+	ros::NodeHandle nh; // create the node handler
 
 	//set up image transport
 	image_transport::ImageTransport it(nh);

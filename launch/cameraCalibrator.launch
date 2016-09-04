@@ -7,4 +7,8 @@
   	<param name="crop_x" value="640" />
   	<param name="crop_y" value="640" />
   </node>
+  
+  <node name="CameraCalibrator" pkg="pauvsi_m7" type="cameraCalibrator" output="screen">
+  	<param name="cameraTopic" value="/PGCameraDriver/bottomCam/color/undistorted" />
+  </node>
 </launch>
