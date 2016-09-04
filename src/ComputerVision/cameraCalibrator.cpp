@@ -130,26 +130,30 @@ int main(int argc, char **argv)
 		imshow("win2", gray_image);
 
 		//image = captureFrame();
-		ros::spinOnce();
-		image = imageMat;
+		//ros::spinOnce();
+		//image = imageMat;
 
-		int key = cv::waitKey(1);
+		int key = cv::waitKey(30);
 
 		if(key==27)
 			return 0;
 
+		ROS_DEBUG("The Key currently pressed is %i", key);
+		key=' ';
 		if(key==' ' && found!=0)
 		{
 			image_points.push_back(corners);
 			object_points.push_back(obj);
-			printf("Snap stored!\n");
+			ROS_INFO("Snap Stored...");
 
 			successes++;
 
 			if(successes>=numBoards)
 				break;
 		}
+		//ros::spinOnce();
 		ros::spinOnce();
+		image = imageMat;
 	}
 
 	cv::Mat intrinsic = cv::Mat(3, 3, CV_32FC1);
@@ -161,6 +165,16 @@ int main(int argc, char **argv)
 	intrinsic.ptr<float>(1)[1] = 1;
 
 	cv::calibrateCamera(object_points, image_points, image.size(), intrinsic, distCoeffs, rvecs, tvecs);
+
+	//SAVING
+	ROS_INFO("Calibration done!");
+	ROS_INFO("COEFFICIENTS of Intrinsic Matrix:");
+	std::cout << "Intrinsic = " << intrinsic << std::endl << std::endl;
+	ROS_INFO("COEFFICIENTS of Distortion Matrix:");
+	std::cout << "Distortion = " << distCoeffs << std::endl << std::endl;
+	//imwrite("calibration/Instrinsics.xml", intrinsic);
+	//imwrite("calibration/Distortion.xml", distCoeffs);
+
 
 	cv::Mat imageUndistorted;
 	while(nh.ok())
