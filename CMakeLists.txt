@@ -18,11 +18,16 @@ find_package(Eigen REQUIRED)
 
 find_package(OpenCV REQUIRED)
 
+find_package(
+	Boost
+)
+
 include_directories(
 	${OpenCV_INCLUDE_DIRS}
 	include
 	${catkin_INCLUDE_DIRS}
 	${Eigen_INCLUDE_DIRS}
+	${Boost_INCLUDE_DIRS}
 )
 
 find_library(POINTGREY_LIB flycapture)

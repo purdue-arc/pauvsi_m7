@@ -12,7 +12,7 @@
   	</node>
   	
   	<node name="ptam" pkg="ptam" type="ptam" clear_params="true" output="screen">
-	    <remap from="image" to="/bottomCam/mono_cropped" />
+	    <remap from="image" to="/PGCameraDriver/bottomCam/mono/cropped" />
         <remap from="pose" to="pose"/>
 	    <rosparam file="$(find pauvsi_m7)/params/PtamFixParams-13Y3C.yaml"/>
     </node>

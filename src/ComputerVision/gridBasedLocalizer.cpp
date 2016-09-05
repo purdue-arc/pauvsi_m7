@@ -7,11 +7,12 @@
 #include <math.h>
 #include "gridLoc.h"
 
-#define MAX_CAMS 5
+std::vector<ros::Time> imageTimes; // stores the time a picture was taken
+std::vector<cv::Mat> monoImages; //stores the undistorted mono image
+std::vector<cv::Mat> colorImages; //stores the undistorted color image
 
-std::vector<ros::Time> imageTimes(MAX_CAMS); // stores the time a picture was taken
-std::vector<cv::Mat> monoImages(MAX_CAMS); //stores the undistorted mono image
-std::vector<cv::Mat> colorImages(MAX_CAMS); //stores the undistorted color image
+//PARAMETERS
+int numberOfCameras = 0; // the number of cameras used in the system
 
 void colorImageCallback(const sensor_msgs::ImageConstPtr& msg, int camNumber)
 {
@@ -41,6 +42,7 @@ int main(int argc, char **argv)
 	std::vector<image_transport::Subscriber> monoImageSubs(MAX_CAMS);
 
 	//I use boost::bind(callback, _1, int) to make the number of cams dynamic
+	for
 
 	return 0;
 }

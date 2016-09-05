@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 	//setup publishers and transports
 	image_transport::ImageTransport it1(nh);
 	image_transport::ImageTransport it2(nh);
-	image_transport::ImageTransport it3(nh);
+	//image_transport::ImageTransport it3(nh);
 	string topicName = "";
 
 	image_transport::Publisher rawMonoPub;
@@ -69,11 +69,11 @@ int main(int argc, char **argv)
 	topicName += "/color/undistorted";
 	undistortedColorPub = it2.advertise(topicName, 1);
 
-	image_transport::Publisher undistortedMonoPub;
+	/*image_transport::Publisher undistortedMonoPub;
 	topicName = "PGCameraDriver/";
 	topicName += messagePrefix;
 	topicName += "/mono/undistorted";
-	undistortedMonoPub = it3.advertise(topicName, 1);
+	undistortedMonoPub = it3.advertise(topicName, 1);*/
 
 	//set the rate
 	ros::Rate loop_rate(rate);
@@ -135,7 +135,7 @@ int main(int argc, char **argv)
 			undistortedColorPub.publish(msg);
 		}
 
-		//undistorted color publisher
+		/*//undistorted mono publisher
 		if(undistortedMonoPub.getNumSubscribers() > 0)
 		{
 			cv::Mat monoImage;
@@ -144,7 +144,7 @@ int main(int argc, char **argv)
 			//create and publish
 			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(head, "mono8", monoImage).toImageMsg();
 			undistortedMonoPub.publish(msg);
-		}
+		}*/
 
 		//SLEEP
 		loop_rate.sleep();
