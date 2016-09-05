@@ -1,0 +1,12 @@
+<launch>
+  <node name="bottomCamera" pkg="pauvsi_m7" type="cameraDriver" output="screen">
+  	<param name="frame_rate" value="30" />
+  	<param name="serial_number" value="15356310" />
+  	<param name="camera_type" value="1" />
+  	<param name="camera_position" value="front" />
+  </node>
+  
+  <node name="gridLocalizer" pkg="pauvsi_m7" type="gridBasedLocalizer" output="screen">
+  	<rosparam command="load" file="$(find pauvsi_m7)/params/gridBasedLocalizer.yaml">
+  </node>
+</launch>
