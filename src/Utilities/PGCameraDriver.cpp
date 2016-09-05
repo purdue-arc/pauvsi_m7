@@ -80,6 +80,10 @@ int main(int argc, char **argv)
 	//the main loop
 	while(nh.ok())
 	{
+		//set the message time stamp for the image capture;
+		std_msgs::Header head = std_msgs::Header();
+		head.stamp.now();
+
 		//capture the raw image from cam
 		FlyCapture2::Image rawImage;
 		error = camera.RetrieveBuffer( &rawImage );
@@ -119,7 +123,7 @@ int main(int argc, char **argv)
 			cv::Size newSize(OFCropX, OFCropY);
 			cv::resize(monoImage, monoImage, newSize);
 			//create and publish
-			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", monoImage).toImageMsg();
+			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(head, "mono8", monoImage).toImageMsg();
 			rawMonoPub.publish(msg);
 		}
 
@@ -127,7 +131,7 @@ int main(int argc, char **argv)
 		if(undistortedColorPub.getNumSubscribers() > 0)
 		{
 			//create and publish
-			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", raw_image).toImageMsg();
+			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(head, "bgr8", raw_image).toImageMsg();
 			undistortedColorPub.publish(msg);
 		}
 
@@ -138,7 +142,7 @@ int main(int argc, char **argv)
 			//convert image to grayscale
 			cvtColor(raw_image, monoImage, CV_BGR2GRAY);
 			//create and publish
-			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", monoImage).toImageMsg();
+			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(head, "mono8", monoImage).toImageMsg();
 			undistortedMonoPub.publish(msg);
 		}
 

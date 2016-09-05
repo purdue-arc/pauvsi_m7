@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pauvsi_m7)
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   roscpp
@@ -9,11 +11,18 @@ find_package(catkin REQUIRED COMPONENTS
   dynamic_reconfigure
   cv_bridge
   image_transport
+  cmake_modules
 )
 
+find_package(Eigen REQUIRED)
+
 find_package(OpenCV REQUIRED)
+
 include_directories(
 	${OpenCV_INCLUDE_DIRS}
+	include
+	${catkin_INCLUDE_DIRS}
+	${Eigen_INCLUDE_DIRS}
 )
 
 find_library(POINTGREY_LIB flycapture)
@@ -27,10 +36,12 @@ if(NOT POINTGREY_LIB)
 endif()
 
 #IMPORTANT
-catkin_package()
-include_directories(
-	${catkin_INCLUDE_DIRS}
+catkin_package(
+	INCLUDE_DIRS include
+	DEPENDS eigen opencv
 )
+
+add_library(gridLoc include/gridLoc.cpp)
 
 add_executable(cameraDriver src/Utilities/PGCameraDriver.cpp)
 target_link_libraries(cameraDriver ${POINTGREY_LIB} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
@@ -38,5 +49,7 @@ target_link_libraries(cameraDriver ${POINTGREY_LIB} ${catkin_LIBRARIES} ${OpenCV
 add_executable(cameraCalibrator src/ComputerVision/cameraCalibrator.cpp)
 target_link_libraries(cameraCalibrator ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
+add_executable(gridBasedLocalizer src/ComputerVision/gridBasedLocalizer.cpp)
+target_link_libraries(gridBasedLocalizer ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES})
 
 
