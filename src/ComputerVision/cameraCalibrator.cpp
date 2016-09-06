@@ -74,6 +74,8 @@ int main(int argc, char **argv)
 	int numCornersHor;
 	int numCornersVer;
 
+	ros::Duration wait(1);
+	wait.sleep();
 	ROS_INFO("Enter number of corners along width: ");
 	scanf("%d", &numCornersHor);
 
@@ -126,8 +128,8 @@ int main(int argc, char **argv)
 			cv::drawChessboardCorners(gray_image, board_sz, corners, found);
 		}
 
-		imshow("win1", image);
-		imshow("win2", gray_image);
+		imshow("color", image);
+		imshow("Corner Tracking", gray_image);
 
 		//image = captureFrame();
 		//ros::spinOnce();
@@ -169,15 +171,17 @@ int main(int argc, char **argv)
 	//SAVING
 	ROS_INFO("Calibration done!");
 	ROS_INFO("COEFFICIENTS of Intrinsic Matrix:");
-	std::cout << "Intrinsic = " << intrinsic << std::endl << std::endl;
+	ROS_INFO_STREAM("Intrinsic = " << intrinsic << std::endl);
 	ROS_INFO("COEFFICIENTS of Distortion Matrix:");
-	std::cout << "Distortion = " << distCoeffs << std::endl << std::endl;
+	ROS_INFO_STREAM("Distortion = " << distCoeffs << std::endl);
+
+	ROS_DEBUG_STREAM("Dist dimensions rows: " << distCoeffs.rows << " cols: " << distCoeffs.cols);
 	//imwrite("calibration/Instrinsics.xml", intrinsic);
 	//imwrite("calibration/Distortion.xml", distCoeffs);
-	ROS_INFO("SAVING AS FILE...");
-	FileStorage fsi("intrinsic.xml", FileStorage::WRITE);
+	ROS_DEBUG("SAVING AS FILE...");
+	FileStorage fsi("~/intrinsic.xml", FileStorage::WRITE);
 	fsi << "intrinsic" << intrinsic;
-	FileStorage fsd("distortion.xml", FileStorage::WRITE);
+	FileStorage fsd("~/distortion.xml", FileStorage::WRITE);
 	fsd << "distortion" << distCoeffs;
 
 	fsi.release();
@@ -192,8 +196,8 @@ int main(int argc, char **argv)
 
 		cv::undistort(image, imageUndistorted, intrinsic, distCoeffs);
 
-		cv::imshow("win1", image);
-		cv::imshow("win2", imageUndistorted);
+		cv::imshow("Raw image", image);
+		cv::imshow("Undistorted image", imageUndistorted);
 
 		cv::waitKey(1);
 		ros::spinOnce();

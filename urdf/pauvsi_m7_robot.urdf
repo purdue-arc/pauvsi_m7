@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<robot name="pauvsi_m7_robot">
+	<link name="base_link">
+		<visual>
+			<geometry>
+				<box size="0.2 0.2 0.1"/>
+			</geometry>
+			<material name="gray">
+				<color rgba="0.5 0.5 0.5 1" />
+			</material>
+		</visual>
+	</link>
+	
+	<link name="arm1_link">
+		<visual>
+			<geometry>
+				<cylinder length="0.284" radius="0.036"/>
+			</geometry>
+			<material name="red">
+				<color rgba="0.8 0 0 1" />
+			</material>
+			<origin rpy="0.753504 1.57075 0" xyz="0 0 0"/>
+		</visual>
+	</link>
+	
+	<joint name="base_to_arm1" type="fixed">
+		<parent link="base_link"/>
+		<child link="arm1_link"/>
+		<origin xyz="-0.18 0.18 0"/>
+	</joint>
+</robot>

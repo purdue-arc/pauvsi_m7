@@ -1,0 +1,28 @@
+#NUMBER OF CAMERAS IN SYSTEM
+numberOfCams: 1
+
+#GRID INFO
+gridWidth: 20
+gridHeight: 20
+gridSpacing: 1 #meters
+
+#CAMERAS
+#place the camera number after each parameter for the corresponding camera
+
+#CAMERA 0 PARAMETERS
+
+#CAMERA TOPIC FOR CV
+cameraTopic_0: /PGCameraDriver/front/color/undistorted
+
+#CAMERA FOVs IN RADIANS 
+cameraVerticalFOV_0: 1.57
+cameraHorizontalFOV_0: 1.57
+
+#CAMERA INTRINSIC MATRIX
+cameraIntrinsic_0: [1035.203305928913, 0, 668.4512727002184; 0, 1033.481997796407, 478.0281378365561; 0, 0, 1]
+
+#CAMERA DISTORTION MATRIX
+cameraDistortion_0: [-0.4096880681395127, 0.2088728091384491, -0.0003398759271267612, -0.0008781290070450316, -0.05624067494923116]
+
+ 
+

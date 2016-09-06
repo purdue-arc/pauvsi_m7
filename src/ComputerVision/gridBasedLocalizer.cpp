@@ -87,6 +87,11 @@ int main(int argc, char **argv)
 
 	while(nh.ok())
 	{
+		if(colorImages.at(0).cols != 0)
+		{
+			cv::imshow(topicNames.at(0) ,colorImages.at(0));
+			cv::waitKey(30);
+		}
 		ros::spinOnce();
 	}
 
