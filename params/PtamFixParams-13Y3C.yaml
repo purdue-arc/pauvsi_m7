@@ -31,7 +31,7 @@ FASTMethod: OAST16
 MaxStereoInitLoops: 4
 AutoInitPixel: 20
 
-# --- bluefox - low distort lens  --- 
+# --- Chameleon - high distort lens  --- 
 Cam_fx: 0.388349
 Cam_fy: 0.387927
 Cam_cx: 0.502676

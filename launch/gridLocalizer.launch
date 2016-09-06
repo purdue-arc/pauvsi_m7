@@ -1,4 +1,6 @@
 <launch>
+  <node name="rqt_console" pkg="rqt_console" type="rqt_console"/>
+
   <node name="bottomCamera" pkg="pauvsi_m7" type="cameraDriver" output="screen">
   	<param name="frame_rate" value="30" />
   	<param name="serial_number" value="15356310" />
@@ -7,6 +9,6 @@
   </node>
   
   <node name="gridLocalizer" pkg="pauvsi_m7" type="gridBasedLocalizer" output="screen">
-  	<rosparam command="load" file="$(find pauvsi_m7)/params/gridBasedLocalizer.yaml">
+  	<rosparam command="load" file="$(find pauvsi_m7)/params/gridBasedLocalizerParams.yaml" />
   </node>
 </launch>

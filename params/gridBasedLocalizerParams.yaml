@@ -8,20 +8,20 @@ gridHeight: 20
 gridSpacing: 1
 
 #place the camera number after each parameter for the corresponding camera
-#CAMERA 1 PARAMETERS
+#CAMERA 0 PARAMETERS
 #	CAMERA TOPIC 
-cameraTopic_1: /PGCameraDriver/front/color/undistorted
+cameraTopic_0: /PGCameraDriver/front/color/undistorted
 #	CAMERA FOVs IN RADIANS 
-cameraVerticalFOV_1: 1.57
-cameraHorizontalFOV_1: 1.57
+cameraVerticalFOV_0: 1.57
+cameraHorizontalFOV_0: 1.57
 #	CAMERA POSITION RELATIVE TO ROBOT CENTER OF MASS
-cameraPosX_1: 0.5
-cameraPosY_1: 0
-cameraPosZ_1: 0
+cameraPosX_0: 0.5
+cameraPosY_0: 0
+cameraPosZ_0: 0
 #	CAMERA DIRECTION UNIT VECTOR
-cameraDirX_1: 1
-cameraDirY_1: 0
-cameraDirZ_1: 0 
+cameraDirX_0: 1
+cameraDirY_0: 0
+cameraDirZ_0: 0 
 
  
 
