@@ -8,4 +8,6 @@
     </node>
     
     <node name="rviz" pkg="rviz" type="rviz" />
+    
+    <node pkg="tf" type="static_transform_publisher" name="baseLinkTestTransform" args="0 0.5 0.5 1.9 0 0.3 world base_link 100" />
 </launch>
