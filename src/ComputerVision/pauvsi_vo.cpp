@@ -9,6 +9,5 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "pauvsi_vo", ros::init_options::AnonymousName); // initializes with a randomish name
 	ros::NodeHandle nh;
-
 	return 0;
 }
