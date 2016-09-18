@@ -1,3 +1,5 @@
 <launch>
-	<node name="flightControllerSerial" pkg="rosserial_python" port="/dev/ttyAM0"/>
+	<node name="flightControllerSerial" pkg="rosserial_python" type="serial_node.py">
+		<param name="port" value="/dev/ttyAM0" />
+	</node>
 </launch>
