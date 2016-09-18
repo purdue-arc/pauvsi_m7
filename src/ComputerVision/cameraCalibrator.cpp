@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <image_transport/image_transport.h>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/calib3d.hpp>
 #include <cv_bridge/cv_bridge.h>
 
 using namespace cv;
@@ -103,7 +104,7 @@ int main(int argc, char **argv)
 	image = imageMat;
 	//image = captureFrame();
 
-	vector<Point3f> obj;
+	std::vector<cv::Point3f> obj;
 	for(int j=0;j<numSquares;j++)
 	{
 		obj.push_back(Point3f(j/numCornersHor, j%numCornersHor, 0.0f));
@@ -179,10 +180,10 @@ int main(int argc, char **argv)
 	//imwrite("calibration/Instrinsics.xml", intrinsic);
 	//imwrite("calibration/Distortion.xml", distCoeffs);
 	ROS_DEBUG("SAVING AS FILE...");
-	FileStorage fsi("~/intrinsic.xml", FileStorage::WRITE);
-	fsi << "intrinsic" << intrinsic;
-	FileStorage fsd("~/distortion.xml", FileStorage::WRITE);
-	fsd << "distortion" << distCoeffs;
+	FileStorage fsi("../params/intrinsic.xml", FileStorage::WRITE);
+	fsi << intrinsic;
+	FileStorage fsd("../params/distortion.xml", FileStorage::WRITE);
+	fsd << distCoeffs;
 
 	fsi.release();
 	fsd.release();
