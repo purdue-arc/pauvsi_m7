@@ -180,9 +180,9 @@ int main(int argc, char **argv)
 	//imwrite("calibration/Instrinsics.xml", intrinsic);
 	//imwrite("calibration/Distortion.xml", distCoeffs);
 	ROS_DEBUG("SAVING AS FILE...");
-	FileStorage fsi("../params/intrinsic.xml", FileStorage::WRITE);
+	FileStorage fsi("../params/intrinsic.yml", FileStorage::WRITE);
 	fsi << intrinsic;
-	FileStorage fsd("../params/distortion.xml", FileStorage::WRITE);
+	FileStorage fsd("../params/distortion.yml", FileStorage::WRITE);
 	fsd << distCoeffs;
 
 	fsi.release();
