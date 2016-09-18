@@ -51,7 +51,7 @@ add_library(gridLoc include/gridLoc.cpp)
 add_executable(cameraDriver src/Utilities/PGCameraDriver.cpp)
 target_link_libraries(cameraDriver ${POINTGREY_LIB} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
-add_executable(cameraCalibrator src/ComputerVision/cameraCalibrator.cpp)
+add_executable(cameraCalibrator src/Utilities/cameraCalibrator.cpp)
 target_link_libraries(cameraCalibrator ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(gridBasedLocalizer src/ComputerVision/gridBasedLocalizer.cpp)
