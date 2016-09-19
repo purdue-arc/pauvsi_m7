@@ -57,9 +57,9 @@ add_executable(cameraCalibrator src/Utilities/cameraCalibrator.cpp)
 target_link_libraries(cameraCalibrator ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 add_executable(gridBasedLocalizer src/ComputerVision/gridBasedLocalizer.cpp)
-target_link_libraries(gridBasedLocalizer ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES})
+target_link_libraries(gridBasedLocalizer ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES} gridLoc)
 
 add_executable(pauvsi_vo src/ComputerVision/pauvsi_vo.cpp)
-target_link_libraries(pauvsi_vo ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES})
+target_link_libraries(pauvsi_vo ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES} vo)
 
 

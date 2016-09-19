@@ -4,7 +4,8 @@
 //my libraries
 #include "pauvsi_vo/vo.h"
 
-VO vo(0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+VO vo;
+
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {

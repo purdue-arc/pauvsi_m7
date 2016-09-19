@@ -20,6 +20,8 @@ class VO
 
 private:
 
+	ros::NodeHandle nh;
+
 	cv::Mat currentFrame;
 	std::vector<cv::Mat> keyFrames; //the keyFrame vector
 
@@ -28,9 +30,11 @@ private:
 
 public:
 
-	VO(double px, double py, double pz, double qw, double qx, double qy, double qz);
+	VO();
 
 	void correctPosition(std::vector<double> pos);
+
+	void passNodeHandle(ros::NodeHandle nh);
 
 };
 
