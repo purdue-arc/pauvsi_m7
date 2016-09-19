@@ -28,6 +28,8 @@ int serial;
 bool crop;
 bool pubUndistorted = false;
 bool pubDistorted = false;
+bool pubMono = true;
+bool pubColor = true;
 string messagePrefix;
 int cropX;
 int cropY;
@@ -60,20 +62,37 @@ int main(int argc, char **argv)
 
 	//SETUP PUBLISHERS
 	image_transport::ImageTransport it(nh);
-	//image_transport::ImageTransport it3(nh);
+	//image_transport::ImageTransport it(nh);
 	string topicName = "";
+
+
 
 	image_transport::Publisher undistortedColorPub;
 	topicName = "PGCameraDriver/";
 	topicName += messagePrefix;
 	topicName += "/color/undistorted";
-	undistortedColorPub = it.advertise(topicName, 1);
+	if(pubColor && pubUndistorted)
+	{
+		undistortedColorPub = it.advertise(topicName, 1);
+	}
 
 	image_transport::Publisher distortedColorPub;
 	topicName = "PGCameraDriver/";
 	topicName += messagePrefix;
 	topicName += "/color/distorted";
-	distortedColorPub = it.advertise(topicName, 1);
+	if(pubColor && pubDistorted)
+	{
+		distortedColorPub = it.advertise(topicName, 1);
+	}
+
+	image_transport::Publisher undistortedMonoPub;
+	topicName = "PGCameraDriver/";
+	topicName += messagePrefix;
+	topicName += "/mono/undistorted";
+	if(pubMono && pubUndistorted)
+	{
+		undistortedMonoPub = it.advertise(topicName, 1);
+	}
 
 	ROS_DEBUG("set up publishers");
 
@@ -88,9 +107,24 @@ int main(int argc, char **argv)
 		head.stamp = ros::Time::now();
 
 		//CAPTURE
-		cv::Mat raw_image = captureAndConvert();
-		//cv::imshow("test", raw_image);
-		//cv::waitKey(1);
+		//------------------------------------
+		FlyCapture2::Image rawImage;
+		error = camera.RetrieveBuffer( &rawImage );
+		if ( error != FlyCapture2::PGRERROR_OK )
+		{
+			ROS_ERROR("Capture Error");
+		}
+
+		// CONVERT TO BGR
+		FlyCapture2::Image bgrImage;
+		rawImage.Convert( FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage );
+
+		// CONVERT TO MAT
+		unsigned int rowBytes = (double)bgrImage.GetReceivedDataSize()/(double)bgrImage.GetRows();
+		cv::Mat raw_image = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(),rowBytes);
+
+		ROS_DEBUG_ONCE("Image size: %i, %i", raw_image.cols, raw_image.rows);
+		//------------------------------------
 
 		//CROP IMAGE IF REQUESTED
 		if(crop)
@@ -99,6 +133,13 @@ int main(int argc, char **argv)
 			cv::Rect roi(round(double(raw_image.cols - cropX) / 2.0), round(double(raw_image.rows - cropY) / 2.0), cropX, cropY);
 			//create image from rect
 			raw_image = raw_image(roi);
+		}
+
+		//UNDISTORT IF REQUESTED
+		cv::Mat undistorted_image;
+		if(pubUndistorted)
+		{
+			cv::undistort(raw_image, undistorted_image, intrinsic, distortion);
 		}
 
 		//cv::imshow("test", raw_image);
@@ -110,8 +151,25 @@ int main(int argc, char **argv)
 		{
 			//create and publish
 			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(head, "bgr8", raw_image).toImageMsg();
-			cv::waitKey(1);
 			distortedColorPub.publish(msg);
+		}
+
+
+		if(undistortedColorPub.getNumSubscribers() > 0 && pubUndistorted)
+		{
+			//create and publish
+			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(head, "bgr8", undistorted_image).toImageMsg();
+			undistortedColorPub.publish(msg);
+		}
+
+		if(undistortedMonoPub.getNumSubscribers() > 0 && pubUndistorted)
+		{
+			//create and publish
+			cv::Mat gray_image;
+			cvtColor(undistorted_image, gray_image, CV_BGR2GRAY);
+			//cv::imshow("test", gray_image);
+			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(head, "mono8", gray_image).toImageMsg();
+			undistortedMonoPub.publish(msg);
 		}
 
 		//SLEEP
@@ -124,30 +182,7 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-cv::Mat captureAndConvert()
-{
-	FlyCapture2::Image rawImage;
-	error = camera.RetrieveBuffer( &rawImage );
-	if ( error != FlyCapture2::PGRERROR_OK )
-	{
-		ROS_ERROR("Capture Error");
-	}
 
-	// CONVERT TO BGR
-	FlyCapture2::Image bgrImage;
-	rawImage.Convert( FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage );
-
-	// CONVERT TO MAT
-	unsigned int rowBytes = (double)bgrImage.GetReceivedDataSize()/(double)bgrImage.GetRows();
-	cv::Mat temp = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(),rowBytes);
-
-	//cv::imshow("test", temp);
-	//cv::waitKey(1);
-
-	ROS_DEBUG_ONCE("Image size: %i, %i", temp.cols, temp.rows);
-
-	return temp;
-}
 
 void getParameters()
 {
@@ -169,6 +204,9 @@ void getParameters()
 
 	ros::param::param<bool>("~publishDistorted", pubDistorted, false);
 	ros::param::param<bool>("~publishUndistorted", pubUndistorted, true);
+
+	ros::param::param<bool>("~publishMono", pubMono, true);
+	ros::param::param<bool>("~publishColor", pubMono, true);
 
 	ros::param::param<std::string>("~cameraIntrinsic", intrinsicString, "0");
 	ros::param::param<std::string>("~cameraDistortion", distortionString, "0");
