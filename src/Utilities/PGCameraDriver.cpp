@@ -63,17 +63,17 @@ int main(int argc, char **argv)
 	//image_transport::ImageTransport it3(nh);
 	string topicName = "";
 
-	image_transport::Publisher distortedColorPub;
-	topicName = "PGCameraDriver/";
-	topicName += messagePrefix;
-	topicName += "/color/distorted";
-	distortedColorPub = it.advertise(topicName, 1);
-
 	image_transport::Publisher undistortedColorPub;
 	topicName = "PGCameraDriver/";
 	topicName += messagePrefix;
 	topicName += "/color/undistorted";
 	undistortedColorPub = it.advertise(topicName, 1);
+
+	image_transport::Publisher distortedColorPub;
+	topicName = "PGCameraDriver/";
+	topicName += messagePrefix;
+	topicName += "/color/distorted";
+	distortedColorPub = it.advertise(topicName, 1);
 
 	ROS_DEBUG("set up publishers");
 
@@ -89,6 +89,8 @@ int main(int argc, char **argv)
 
 		//CAPTURE
 		cv::Mat raw_image = captureAndConvert();
+		//cv::imshow("test", raw_image);
+		//cv::waitKey(1);
 
 		//CROP IMAGE IF REQUESTED
 		if(crop)
@@ -99,12 +101,16 @@ int main(int argc, char **argv)
 			raw_image = raw_image(roi);
 		}
 
+		//cv::imshow("test", raw_image);
+		//cv::waitKey(1);
+
 		//check if a topic has subscribers then send is message
 		// distorted color publisher
 		if (distortedColorPub.getNumSubscribers() > 0 && pubDistorted)
 		{
 			//create and publish
 			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(head, "bgr8", raw_image).toImageMsg();
+			cv::waitKey(1);
 			distortedColorPub.publish(msg);
 		}
 
@@ -134,6 +140,9 @@ cv::Mat captureAndConvert()
 	// CONVERT TO MAT
 	unsigned int rowBytes = (double)bgrImage.GetReceivedDataSize()/(double)bgrImage.GetRows();
 	cv::Mat temp = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(),rowBytes);
+
+	//cv::imshow("test", temp);
+	//cv::waitKey(1);
 
 	ROS_DEBUG_ONCE("Image size: %i, %i", temp.cols, temp.rows);
 
@@ -395,6 +404,6 @@ cv::Mat createMatFromString(std::string text)
 
 string removeSpaces(string input)
 {
-  input.erase(std::remove(input.begin(),input.end(),' '),input.end());
-  return input;
+	input.erase(std::remove(input.begin(),input.end(),' '),input.end());
+	return input;
 }
