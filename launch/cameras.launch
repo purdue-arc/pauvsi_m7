@@ -1,10 +1,13 @@
 <launch>
   <node name="bottomCamera" pkg="pauvsi_m7" type="cameraDriver" output="screen">
   	<param name="frame_rate" value="30" />
-  	<param name="serial_number" value="15356310" />
-  	<param name="camera_type" value="1" />
-  	<param name="camera_position" value="bottomCam" />
-  	<param name="crop_x" value="640" />
-  	<param name="crop_y" value="640" />
+  	<param name="serial_number" value="15374828" />
+  	<param name="crop" value="false" />
+  	<param name="camera_position" value="side" />
+  	<param name="crop_x" value="1000" />
+  	<param name="crop_y" value="1000" />
+	<param name="publishUndistorted" value="true" />
+	<param name="publishDistorted" value="false" />
+	<rosparam file="$(find pauvsi_m7)/params/13Y3C_params.yaml"/>
   </node>
 </launch>

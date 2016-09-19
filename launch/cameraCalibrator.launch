@@ -3,12 +3,14 @@
   	<param name="frame_rate" value="30" />
   	<param name="serial_number" value="15374828" />
   	<param name="crop" value="true" />
-  	<param name="camera_position" value="bottomCam" />
+  	<param name="camera_position" value="bottom" />
   	<param name="crop_x" value="1000" />
   	<param name="crop_y" value="1000" />
+	<param name="publishUndistorted" value="true" />
+	<param name="publishDistorted" value="false" />
   </node>
   
   <node name="CameraCalibrator" pkg="pauvsi_m7" type="cameraCalibrator" output="screen">
-  	<param name="cameraTopic" value="/PGCameraDriver/bottomCam/color/undistorted" />
+  	<param name="cameraTopic" value="/PGCameraDriver/bottom/color/undistorted" />
   </node>
 </launch>

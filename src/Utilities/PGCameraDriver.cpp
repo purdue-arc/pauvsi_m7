@@ -3,9 +3,11 @@
 #include <flycapture/FlyCapture2.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/calib3d.hpp>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <iostream>
+#include <string>
 #include <math.h>
 
 using std::string;
@@ -15,20 +17,26 @@ void getParameters();
 bool setImageSettings(int x_offset, int y_offset, int width, int height, FlyCapture2::PixelFormat pixelForm, FlyCapture2::Mode mode);
 bool setProperty(const FlyCapture2::PropertyType &type, const bool &autoSet, unsigned int &valueA, unsigned int &valueB);
 bool adjustCameraSettings();
+cv::Mat captureAndConvert();
+cv::Mat createMatFromString(std::string text);
+string removeSpaces(string input);
 
 #define DEFAULT_RATE 10
-#define CAM_13Y3C 2
-#define CAM_13S2C 1
-//These are for removing the unilluminated pixels from the shot
-#define CAM_13Y3C_CROPX 1000
-#define CAM_13Y3C_CROPY 1000
 
 int rate;
 int serial;
 bool crop;
+bool pubUndistorted = false;
+bool pubDistorted = false;
 string messagePrefix;
-int OFCropX;
-int OFCropY;
+int cropX;
+int cropY;
+string distortionString;
+string intrinsicString;
+
+//distortion matrices
+cv::Mat intrinsic;
+cv::Mat distortion;
 
 FlyCapture2::Error error;
 FlyCapture2::Camera camera;
@@ -43,19 +51,31 @@ int main(int argc, char **argv)
 	getParameters(); // set all params
 	ROS_DEBUG("Params %i, %i, %i", rate, serial, crop);
 
-	// Connect the camera
+	//CREATE THE DISTORTION MATS
+	intrinsic = createMatFromString(intrinsicString);
+	distortion = createMatFromString(distortionString);
+
+	// CONNECT CAMERA
 	connectCamera();
 
 	//SETUP PUBLISHERS
-	image_transport::ImageTransport it1(nh);
+	image_transport::ImageTransport it(nh);
 	//image_transport::ImageTransport it3(nh);
 	string topicName = "";
+
+	image_transport::Publisher distortedColorPub;
+	topicName = "PGCameraDriver/";
+	topicName += messagePrefix;
+	topicName += "/color/distorted";
+	distortedColorPub = it.advertise(topicName, 1);
 
 	image_transport::Publisher undistortedColorPub;
 	topicName = "PGCameraDriver/";
 	topicName += messagePrefix;
 	topicName += "/color/undistorted";
-	undistortedColorPub = it1.advertise(topicName, 1);
+	undistortedColorPub = it.advertise(topicName, 1);
+
+	ROS_DEBUG("set up publishers");
 
 
 	//SET THE RATE
@@ -68,40 +88,24 @@ int main(int argc, char **argv)
 		head.stamp = ros::Time::now();
 
 		//CAPTURE
-		FlyCapture2::Image rawImage;
-		error = camera.RetrieveBuffer( &rawImage );
-		if ( error != FlyCapture2::PGRERROR_OK )
-		{
-			ROS_WARN("Capture Error");
-			continue;
-		}
-
-		// CONVERT TO BGR
-		FlyCapture2::Image bgrImage;
-		rawImage.Convert( FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage );
-
-		// CONVERT TO MAT
-		unsigned int rowBytes = (double)bgrImage.GetReceivedDataSize()/(double)bgrImage.GetRows();
-		cv::Mat raw_image = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(),rowBytes);
-
-		ROS_DEBUG_ONCE("Image size: %i, %i", raw_image.cols, raw_image.rows);
+		cv::Mat raw_image = captureAndConvert();
 
 		//CROP IMAGE IF REQUESTED
 		if(crop)
 		{
 			//crop the image
-			cv::Rect roi(round(double(raw_image.cols - CAM_13Y3C_CROPX) / 2.0), round(double(raw_image.rows - CAM_13Y3C_CROPY) / 2.0), CAM_13Y3C_CROPX, CAM_13Y3C_CROPY);
+			cv::Rect roi(round(double(raw_image.cols - cropX) / 2.0), round(double(raw_image.rows - cropY) / 2.0), cropX, cropY);
 			//create image from rect
 			raw_image = raw_image(roi);
 		}
 
 		//check if a topic has subscribers then send is message
-		// undistorted color publisher
-		if (undistortedColorPub.getNumSubscribers() > 0)
+		// distorted color publisher
+		if (distortedColorPub.getNumSubscribers() > 0 && pubDistorted)
 		{
 			//create and publish
 			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(head, "bgr8", raw_image).toImageMsg();
-			undistortedColorPub.publish(msg);
+			distortedColorPub.publish(msg);
 		}
 
 		//SLEEP
@@ -112,6 +116,28 @@ int main(int argc, char **argv)
 	camera.Disconnect();
 
 	return 0;
+}
+
+cv::Mat captureAndConvert()
+{
+	FlyCapture2::Image rawImage;
+	error = camera.RetrieveBuffer( &rawImage );
+	if ( error != FlyCapture2::PGRERROR_OK )
+	{
+		ROS_ERROR("Capture Error");
+	}
+
+	// CONVERT TO BGR
+	FlyCapture2::Image bgrImage;
+	rawImage.Convert( FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage );
+
+	// CONVERT TO MAT
+	unsigned int rowBytes = (double)bgrImage.GetReceivedDataSize()/(double)bgrImage.GetRows();
+	cv::Mat temp = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(),rowBytes);
+
+	ROS_DEBUG_ONCE("Image size: %i, %i", temp.cols, temp.rows);
+
+	return temp;
 }
 
 void getParameters()
@@ -128,9 +154,15 @@ void getParameters()
 	//camerPos
 	ros::param::param<string>("~camera_position", messagePrefix, "unknown");
 	//size to crop ptam image by
-	ros::param::param<int>("~crop_x", OFCropX, 640);
-	ros::param::param<int>("~crop_y", OFCropY, 640);
-	ROS_INFO("Cropping image to %i X %i", OFCropX, OFCropY);
+	ros::param::param<int>("~crop_x", cropX, 1000);
+	ros::param::param<int>("~crop_y", cropY, 1000);
+	ROS_INFO("Cropping image to %i X %i", cropX, cropY);
+
+	ros::param::param<bool>("~publishDistorted", pubDistorted, false);
+	ros::param::param<bool>("~publishUndistorted", pubUndistorted, true);
+
+	ros::param::param<std::string>("~cameraIntrinsic", intrinsicString, "0");
+	ros::param::param<std::string>("~cameraDistortion", distortionString, "0");
 }
 
 int connectCamera()
@@ -182,6 +214,7 @@ int connectCamera()
 		ROS_INFO("Started the image capture");
 	}
 
+	ROS_DEBUG("connected camera");
 	return true;
 }
 
@@ -301,4 +334,67 @@ bool adjustCameraSettings()
 	setProperty(FlyCapture2::SHUTTER, true, 1, 0);
 	//set frame rate
 	setProperty(FlyCapture2::FRAME_RATE, false, rate, 0);
+}
+
+/*
+ * This function will take a string containing ; and , and it will create a cv mat from it
+ * this creates a CV32FC1 mat by default
+ */
+cv::Mat createMatFromString(std::string text)
+{
+	ROS_DEBUG_STREAM("creating MAT from " << text << std::endl);
+
+	//size
+	int rows, cols;
+	//setup the row strings
+	std::vector<std::string> rowStrings;
+	std::stringstream textStream(text);
+	std::string segment;
+
+	while(std::getline(textStream, segment, ';'))
+	{
+		rowStrings.push_back(segment);
+	}
+
+	rows = (int)rowStrings.size();
+
+	//find the column size by adding for each segment
+	std::stringstream rowStream(rowStrings.at(0));
+	cols = 0;
+	while(std::getline(rowStream, segment, ','))
+	{
+		cols++;
+	}
+
+	ROS_DEBUG_STREAM("the matrix appears to be rows: " << rows << " cols: " << cols);
+
+	//create the cv::mat
+	cv::Mat matrix = cv::Mat(rows, cols, CV_32FC1);
+	//now cycle through rows and create the cv::Mat
+	for(int i = 0; i < rows; i++)
+	{
+		std::stringstream rowStream(rowStrings.at(i));
+		std::string segment;
+		for(int j = 0; j < cols; j++)
+		{
+			std::getline(rowStream, segment, ',');
+			//remove whitespace
+			segment = removeSpaces(segment);
+			//convert and add to matrix
+			ROS_DEBUG_STREAM("attempting to convert " << segment << " to a float");
+			matrix.at<float>(i, j) = boost::lexical_cast< float >( segment );
+			ROS_DEBUG_STREAM("converted to " << matrix.at<float>(i, j));
+		}
+	}
+
+	ROS_DEBUG_STREAM("created mat. is this correct? " << matrix);
+
+	return matrix;
+
+}
+
+string removeSpaces(string input)
+{
+  input.erase(std::remove(input.begin(),input.end(),' '),input.end());
+  return input;
 }
