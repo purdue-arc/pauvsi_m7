@@ -25,6 +25,7 @@ find_package(
 include_directories(
 	${OpenCV_INCLUDE_DIRS}
 	include
+	include/pauvsi_vo
 	${catkin_INCLUDE_DIRS}
 	${Eigen_INCLUDE_DIRS}
 	${Boost_INCLUDE_DIRS}
@@ -47,6 +48,7 @@ catkin_package(
 )
 
 add_library(gridLoc include/gridLoc.cpp)
+add_library(vo include/pauvsi_vo/vo.cpp)
 
 add_executable(cameraDriver src/Utilities/PGCameraDriver.cpp)
 target_link_libraries(cameraDriver ${POINTGREY_LIB} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
