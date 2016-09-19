@@ -14,7 +14,7 @@ int connectCamera();
 void getParameters();
 bool setImageSettings(int x_offset, int y_offset, int width, int height, FlyCapture2::PixelFormat pixelForm, FlyCapture2::Mode mode);
 bool setProperty(const FlyCapture2::PropertyType &type, const bool &autoSet, unsigned int &valueA, unsigned int &valueB);
-bool adjustCameraSettings(int cameType);
+bool adjustCameraSettings();
 
 #define DEFAULT_RATE 10
 #define CAM_13Y3C 2
@@ -25,7 +25,7 @@ bool adjustCameraSettings(int cameType);
 
 int rate;
 int serial;
-int camType;
+bool crop;
 string messagePrefix;
 int OFCropX;
 int OFCropY;
@@ -41,50 +41,33 @@ int main(int argc, char **argv)
 	ros::NodeHandle nh; // create the node handler
 
 	getParameters(); // set all params
-	ROS_DEBUG("Params %i, %i, %i", rate, serial, camType);
+	ROS_DEBUG("Params %i, %i, %i", rate, serial, crop);
 
 	// Connect the camera
 	connectCamera();
-	//adjust cam settings for best performance
-	adjustCameraSettings(camType);
 
-	//setup publishers and transports
+	//SETUP PUBLISHERS
 	image_transport::ImageTransport it1(nh);
-	image_transport::ImageTransport it2(nh);
 	//image_transport::ImageTransport it3(nh);
 	string topicName = "";
-
-	image_transport::Publisher rawMonoPub;
-	if(camType == CAM_13Y3C)
-	{
-		topicName = "PGCameraDriver/";
-		topicName += messagePrefix;
-		topicName += "/mono/cropped";
-		rawMonoPub = it1.advertise(topicName, 1);
-	}
 
 	image_transport::Publisher undistortedColorPub;
 	topicName = "PGCameraDriver/";
 	topicName += messagePrefix;
 	topicName += "/color/undistorted";
-	undistortedColorPub = it2.advertise(topicName, 1);
+	undistortedColorPub = it1.advertise(topicName, 1);
 
-	/*image_transport::Publisher undistortedMonoPub;
-	topicName = "PGCameraDriver/";
-	topicName += messagePrefix;
-	topicName += "/mono/undistorted";
-	undistortedMonoPub = it3.advertise(topicName, 1);*/
 
-	//set the rate
+	//SET THE RATE
 	ros::Rate loop_rate(rate);
 	//the main loop
 	while(nh.ok())
 	{
-		//set the message time stamp for the image capture;
+		//SET TIMESTAMP
 		std_msgs::Header head = std_msgs::Header();
 		head.stamp = ros::Time::now();
 
-		//capture the raw image from cam
+		//CAPTURE
 		FlyCapture2::Image rawImage;
 		error = camera.RetrieveBuffer( &rawImage );
 		if ( error != FlyCapture2::PGRERROR_OK )
@@ -93,58 +76,33 @@ int main(int argc, char **argv)
 			continue;
 		}
 
-		// convert to bgr
+		// CONVERT TO BGR
 		FlyCapture2::Image bgrImage;
 		rawImage.Convert( FlyCapture2::PIXEL_FORMAT_BGR, &bgrImage );
 
-		// convert to OpenCV Mat
+		// CONVERT TO MAT
 		unsigned int rowBytes = (double)bgrImage.GetReceivedDataSize()/(double)bgrImage.GetRows();
 		cv::Mat raw_image = cv::Mat(bgrImage.GetRows(), bgrImage.GetCols(), CV_8UC3, bgrImage.GetData(),rowBytes);
 
 		ROS_DEBUG_ONCE("Image size: %i, %i", raw_image.cols, raw_image.rows);
 
-		//show the unaltered image
-		//cv::imshow("image", raw_image);
-		//cv::waitKey(30);
-
-		//check if a topic has subscribers then send is message
-		// raw mono publisher for 13Y3C
-		if (camType == CAM_13Y3C && rawMonoPub.getNumSubscribers() > 0)
+		//CROP IMAGE IF REQUESTED
+		if(crop)
 		{
-			//create the image message and publish it
-			cv::Mat monoImage;
-			//convert image to grayscale
-			cvtColor(raw_image, monoImage, CV_BGR2GRAY);
-			//crop the image for ptam
-			cv::Rect roi(round(double(monoImage.cols - CAM_13Y3C_CROPX) / 2.0), round(double(monoImage.rows - CAM_13Y3C_CROPY) / 2.0), CAM_13Y3C_CROPX, CAM_13Y3C_CROPY);
+			//crop the image
+			cv::Rect roi(round(double(raw_image.cols - CAM_13Y3C_CROPX) / 2.0), round(double(raw_image.rows - CAM_13Y3C_CROPY) / 2.0), CAM_13Y3C_CROPX, CAM_13Y3C_CROPY);
 			//create image from rect
-			monoImage = monoImage(roi);
-			//resize the image
-			cv::Size newSize(OFCropX, OFCropY);
-			cv::resize(monoImage, monoImage, newSize);
-			//create and publish
-			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(head, "mono8", monoImage).toImageMsg();
-			rawMonoPub.publish(msg);
+			raw_image = raw_image(roi);
 		}
 
-		//undistorted color publisher
-		if(undistortedColorPub.getNumSubscribers() > 0)
+		//check if a topic has subscribers then send is message
+		// undistorted color publisher
+		if (undistortedColorPub.getNumSubscribers() > 0)
 		{
 			//create and publish
 			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(head, "bgr8", raw_image).toImageMsg();
 			undistortedColorPub.publish(msg);
 		}
-
-		/*//undistorted mono publisher
-		if(undistortedMonoPub.getNumSubscribers() > 0)
-		{
-			cv::Mat monoImage;
-			//convert image to grayscale
-			cvtColor(raw_image, monoImage, CV_BGR2GRAY);
-			//create and publish
-			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(head, "mono8", monoImage).toImageMsg();
-			undistortedMonoPub.publish(msg);
-		}*/
 
 		//SLEEP
 		loop_rate.sleep();
@@ -166,7 +124,7 @@ void getParameters()
 	ros::param::param<int>("~serial_number", serial, 0);
 	ROS_INFO("Driver using %i as serial number", serial);
 	//cam type
-	ros::param::param<int>("~camera_type", camType, 1);
+	ros::param::param<bool>("~crop", crop, false);
 	//camerPos
 	ros::param::param<string>("~camera_position", messagePrefix, "unknown");
 	//size to crop ptam image by
@@ -332,32 +290,15 @@ bool setProperty(const FlyCapture2::PropertyType type, const bool autoSet, unsig
 	return retVal;
 }
 
-bool adjustCameraSettings(int cameType)
+bool adjustCameraSettings()
 {
-	if(camType == CAM_13S2C)
-	{
-		ROS_INFO("Adjusting camera settings for 13S2C camera");
-		//set exposure
-		setProperty(FlyCapture2::AUTO_EXPOSURE, true, 1, 0);
-		//set gain
-		setProperty(FlyCapture2::GAIN, true, 1, 0);
-		//set shutter
-		setProperty(FlyCapture2::SHUTTER, true, 1, 0);
-		//set frame rate
-		setProperty(FlyCapture2::FRAME_RATE, false, rate, 0);
-	}
-	else if(camType == CAM_13Y3C)
-	{
-		ROS_INFO("Adjusting camera settings for 13Y3C camera");
-		//set exposure
-		setProperty(FlyCapture2::AUTO_EXPOSURE, true, 1, 0);
-		//set gain
-		setProperty(FlyCapture2::GAIN, true, 1, 0);
-		//set shutter
-		setProperty(FlyCapture2::SHUTTER, true, 1, 0);
-		//set frame rate
-		setProperty(FlyCapture2::FRAME_RATE, false, rate, 0);
-		//TODO
-		//set the white balance and gamma of this cam
-	}
+	ROS_INFO("Adjusting camera settings for 13S2C camera");
+	//set exposure
+	setProperty(FlyCapture2::AUTO_EXPOSURE, true, 1, 0);
+	//set gain
+	setProperty(FlyCapture2::GAIN, true, 1, 0);
+	//set shutter
+	setProperty(FlyCapture2::SHUTTER, true, 1, 0);
+	//set frame rate
+	setProperty(FlyCapture2::FRAME_RATE, false, rate, 0);
 }
