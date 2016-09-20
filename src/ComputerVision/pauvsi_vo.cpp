@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
-//my libraries
+
 #include "pauvsi_vo/vo.h"
 
 VO vo; // create an instance of the visual odometry algorithm

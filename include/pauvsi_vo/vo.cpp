@@ -25,7 +25,7 @@ void VO::correctPosition(std::vector<double> pos)
  */
 void VO::setCurrentFrame(cv::Mat frame, ros::Time t)
 {
-	currentFrame = Frame::Frame(frame, t);
+	currentFrame = Frame(frame, t);
 }
 
 /*

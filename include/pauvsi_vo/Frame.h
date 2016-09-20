@@ -8,7 +8,11 @@
 #ifndef PAUVSI_M7_INCLUDE_PAUVSI_VO_FRAME_H_
 #define PAUVSI_M7_INCLUDE_PAUVSI_VO_FRAME_H_
 
-#include <vo.h>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/calib3d.hpp>
+#include <vector>
+#include <string>
+#include <ros/ros.h>
 
 class Frame
 {
@@ -25,6 +29,12 @@ public:
 		this->image = img;
 		this->timeCreated = t;
 	}
+
+	Frame()
+	{
+
+	}
+
 	/*
 	 * gets the time since this frame was create
 	 */
