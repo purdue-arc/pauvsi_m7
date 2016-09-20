@@ -4,14 +4,12 @@
 //my libraries
 #include "pauvsi_vo/vo.h"
 
-VO vo;
-
+VO vo; // create an instance of the visual odometry algorithm
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
-	//add images
-	cv::Mat temp = cv_bridge::toCvShare(msg, "bgr8")->image;
-	temp.copyTo(temp);
+	cv::Mat temp = cv_bridge::toCvShare(msg, "mono8")->image;
+	vo.setCurrentFrame(temp, cv_bridge::toCvCopy(msg, "mono8")->header.stamp); //set the current frame and its time created
 }
 
 int main(int argc, char **argv)
@@ -22,6 +20,7 @@ int main(int argc, char **argv)
 	//set up image transport
 	image_transport::ImageTransport it(nh);
 	image_transport::Subscriber imageSub;
+	imageSub = it.subscribe(vo.cameraTopic, 1, imageCallback);
 
 	while(nh.ok())
 	{

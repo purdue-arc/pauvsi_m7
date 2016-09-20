@@ -147,7 +147,7 @@ int main(int argc, char **argv)
 
 		//check if a topic has subscribers then send is message
 		// distorted color publisher
-		if (distortedColorPub.getNumSubscribers() > 0 && pubDistorted)
+		if (distortedColorPub.getNumSubscribers() > 0 && pubDistorted && pubColor)
 		{
 			//create and publish
 			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(head, "bgr8", raw_image).toImageMsg();
@@ -155,14 +155,14 @@ int main(int argc, char **argv)
 		}
 
 
-		if(undistortedColorPub.getNumSubscribers() > 0 && pubUndistorted)
+		if(undistortedColorPub.getNumSubscribers() > 0 && pubUndistorted && pubColor)
 		{
 			//create and publish
 			sensor_msgs::ImagePtr msg = cv_bridge::CvImage(head, "bgr8", undistorted_image).toImageMsg();
 			undistortedColorPub.publish(msg);
 		}
 
-		if(undistortedMonoPub.getNumSubscribers() > 0 && pubUndistorted)
+		if(undistortedMonoPub.getNumSubscribers() > 0 && pubUndistorted && pubMono)
 		{
 			//create and publish
 			cv::Mat gray_image;

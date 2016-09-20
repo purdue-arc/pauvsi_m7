@@ -1,0 +1,4 @@
+cameraTopic: /PGCameraDriver/bottom/mono/undistorted
+imuTopic: /IMU_Full
+
+numKeyframes: 1
