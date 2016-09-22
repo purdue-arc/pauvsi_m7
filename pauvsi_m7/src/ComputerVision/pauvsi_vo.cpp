@@ -22,10 +22,7 @@ int main(int argc, char **argv)
 	image_transport::Subscriber imageSub;
 	imageSub = it.subscribe(vo.cameraTopic, 1, imageCallback);
 
-	while(nh.ok())
-	{
-		ros::spinOnce();
-	}
+	ros::spin();
 
 	return 0;
 }

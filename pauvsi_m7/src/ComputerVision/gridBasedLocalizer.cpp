@@ -5,6 +5,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <iostream>
 #include <math.h>
+
 #include "gridLoc.h"
 
 std::vector<ros::Time> imageTimes; // stores the time a picture was taken

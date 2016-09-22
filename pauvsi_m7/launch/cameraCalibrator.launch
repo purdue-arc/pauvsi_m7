@@ -8,12 +8,12 @@
   	<param name="camera_position" value="side" />
   	<param name="crop_x" value="1000" />
   	<param name="crop_y" value="1000" />
-	<param name="publishUndistorted" value="true" />
+	<param name="publishUndistorted" value="false" />
 	<param name="publishDistorted" value="true" />
 	<rosparam file="$(find pauvsi_m7)/params/13Y3C_params.yaml"/>
   </node>
   
   <node name="CameraCalibrator" pkg="pauvsi_m7" type="cameraCalibrator" output="screen">
-  	<param name="cameraTopic" value="/PGCameraDriver/bottom/color/distorted" />
+  	<param name="cameraTopic" value="/PGCameraDriver/side/color/distorted" />
   </node>
 </launch>

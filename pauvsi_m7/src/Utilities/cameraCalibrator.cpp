@@ -8,12 +8,16 @@
 #include <opencv2/calib3d.hpp>
 #include <cv_bridge/cv_bridge.h>
 
+#define PINHOLE 1
+#define FISHEYE 2
+
 using namespace cv;
 
 int n_boards = 0;  //Number of snapshots of the chessboard
 int frame_step;   //Frames to be skipped
 int board_w;   //Enclosed corners horizontally on the chessboard
 int board_h;   //Enclosed corners vertically on the chessboard
+int cameraModel = 1;
 
 cv::Mat imageMat;
 //IplImage image;
@@ -29,8 +33,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 	ROS_DEBUG("IMAGE COLS %i", imageMat.cols);
 	ROS_DEBUG("IMAGE ROWS %i", imageMat.rows);
 
-	//cv::imshow("test", imageMat);
-	//cv::waitKey(30);
+	cv::imshow("test", imageMat);
+	cv::waitKey(30);
 
 	imageSet = true;
 }
@@ -86,6 +90,9 @@ int main(int argc, char **argv)
 	ROS_INFO("Enter number of boards: ");
 	scanf("%d", &numBoards);
 
+	ROS_INFO("Choose camera model pinhole:1 fisheye:2");
+	scanf("%d", &cameraModel);
+
 	int numSquares = numCornersHor * numCornersVer;
 	cv::Size board_sz = cv::Size(numCornersHor, numCornersVer);
 	//cv::VideoCapture capture = cv::VideoCapture(0);
@@ -100,9 +107,13 @@ int main(int argc, char **argv)
 	cv::Mat gray_image;
 	//capture >> image;
 
+	ROS_DEBUG("capturing frame");
 	ros::spinOnce();
 	image = imageMat;
 	//image = captureFrame();
+
+	//cv::imshow("test", image);
+	//cv::waitKey(1);
 
 	std::vector<cv::Point3f> obj;
 	for(int j=0;j<numSquares;j++)
@@ -115,6 +126,14 @@ int main(int argc, char **argv)
 
 	while(successes<numBoards && nh.ok())
 	{
+		ROS_DEBUG_STREAM("converting image color. size of " << image.cols << " X " << image.rows);
+		if(image.cols <= 0)
+		{
+			ROS_DEBUG("re-capturing frame");
+			ros::spinOnce();
+			image = imageMat;
+			continue;
+		}
 		cvtColor(image, gray_image, CV_BGR2GRAY);
 
 
@@ -159,18 +178,27 @@ int main(int argc, char **argv)
 		image = imageMat;
 	}
 
-	cv::Mat intrinsic = cv::Mat(3, 3, CV_32FC1);
+	cv::Mat intrinsic = cv::Mat(3, 3, CV_32F);
 	cv::Mat distCoeffs;
 	std::vector<cv::Mat> rvecs;
 	std::vector<cv::Mat> tvecs;
+	double rmsError;
 
 	intrinsic.ptr<float>(0)[0] = 1;
 	intrinsic.ptr<float>(1)[1] = 1;
 
-	cv::calibrateCamera(object_points, image_points, image.size(), intrinsic, distCoeffs, rvecs, tvecs);
+	if(cameraModel == PINHOLE)
+	{
+		rmsError = cv::calibrateCamera(object_points, image_points, image.size(), intrinsic, distCoeffs, rvecs, tvecs);
+	}
+	else if(cameraModel == FISHEYE)
+	{
+		rmsError = cv::fisheye::calibrate(object_points, image_points, image.size(), intrinsic, distCoeffs, cv::noArray(), cv::noArray(), fisheye::CALIB_RECOMPUTE_EXTRINSIC | fisheye::CALIB_CHECK_COND | fisheye::CALIB_FIX_SKEW);
+	}
 
 	//SAVING
 	ROS_INFO("Calibration done!");
+	ROS_INFO_STREAM("RMS error: " << rmsError);
 	ROS_INFO("COEFFICIENTS of Intrinsic Matrix:");
 	ROS_INFO_STREAM("Intrinsic = " << intrinsic << std::endl);
 	ROS_INFO("COEFFICIENTS of Distortion Matrix:");
@@ -195,7 +223,14 @@ int main(int argc, char **argv)
 		ros::spinOnce();
 		image = imageMat;
 
-		cv::undistort(image, imageUndistorted, intrinsic, distCoeffs);
+		if(cameraModel == PINHOLE)
+		{
+			cv::undistort(image, imageUndistorted, intrinsic, distCoeffs);
+		}
+		else if(cameraModel == FISHEYE)
+		{
+			cv::fisheye::undistortImage(image, imageUndistorted, intrinsic, distCoeffs);
+		}
 
 		cv::imshow("Raw image", image);
 		cv::imshow("Undistorted image", imageUndistorted);
