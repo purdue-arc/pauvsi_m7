@@ -47,24 +47,24 @@ catkin_package(
 	DEPENDS eigen opencv
 )
 
-add_library(gridLoc include/gridLoc.cpp)
-add_library(frame include/pauvsi_vo/Frame.h)
-set_target_properties(frame PROPERTIES LINKER_LANGUAGE CXX)
-add_library(vo include/pauvsi_vo/vo.cpp)
+#add_library(gridLoc include/gridLoc.cpp)
+#add_library(frame include/pauvsi_vo/Frame.h)
+#set_target_properties(frame PROPERTIES LINKER_LANGUAGE CXX)
+#add_library(vo include/pauvsi_vo/vo.cpp)
 
 
-add_executable(cameraDriver src/Utilities/PGCameraDriver.cpp)
-target_link_libraries(cameraDriver ${POINTGREY_LIB} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+#add_executable(cameraDriver src/Utilities/PGCameraDriver.cpp)
+#target_link_libraries(cameraDriver ${POINTGREY_LIB} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
-add_executable(cameraCalibrator src/Utilities/cameraCalibrator.cpp)
-target_link_libraries(cameraCalibrator ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+#add_executable(cameraCalibrator src/Utilities/cameraCalibrator.cpp)
+#target_link_libraries(cameraCalibrator ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
-add_executable(gridBasedLocalizer src/ComputerVision/gridBasedLocalizer.cpp)
-target_link_libraries(gridBasedLocalizer ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES} gridLoc)
+#add_executable(gridBasedLocalizer src/ComputerVision/gridBasedLocalizer.cpp)
+#target_link_libraries(gridBasedLocalizer ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES} gridLoc)
 
-add_executable(pauvsi_vo src/ComputerVision/pauvsi_vo.cpp)
-target_link_libraries(vo frame)
-target_link_libraries(pauvsi_vo ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES} vo)
+#add_executable(pauvsi_vo src/ComputerVision/pauvsi_vo.cpp)
+#target_link_libraries(vo frame)
+#target_link_libraries(pauvsi_vo ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES} vo)
 
 
 
