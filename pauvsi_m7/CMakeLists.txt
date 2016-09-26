@@ -24,8 +24,6 @@ find_package(
 
 include_directories(
 	${OpenCV_INCLUDE_DIRS}
-	include
-	include/pauvsi_vo
 	${catkin_INCLUDE_DIRS}
 	${Eigen_INCLUDE_DIRS}
 	${Boost_INCLUDE_DIRS}
@@ -42,8 +40,7 @@ if(NOT POINTGREY_LIB)
 endif()
 
 #IMPORTANT
-catkin_package(
-	INCLUDE_DIRS include 
+catkin_package( 
 	DEPENDS eigen opencv
 )
 
