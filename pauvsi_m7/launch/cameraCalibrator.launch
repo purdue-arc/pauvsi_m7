@@ -1,17 +1,18 @@
 <launch>
-  <node name="bottom" pkg="pauvsi_m7" type="cameraDriver" output="screen">
-  	<param name="frame_rate" value="30" />
-  	<param name="serial_number" value="15374828" />
-  	<param name="crop" value="true" />
-	<param name="publishMono" value="true" />
-	<param name="publishColor" value="true" />
-  	<param name="camera_position" value="side" />
-  	<param name="crop_x" value="1000" />
-  	<param name="crop_y" value="1000" />
-	<param name="publishUndistorted" value="false" />
-	<param name="publishDistorted" value="true" />
-	<rosparam file="$(find pauvsi_m7)/params/13Y3C_params.yaml"/>
-  </node>
+  <node name="camera" pkg="pauvsi_pgc_driver" type="pgcDriver" output="screen">
+		<param name="frame_rate" value="50" />
+  		<param name="serial_number" value="15355310" />
+  		<param name="publish_rectified" value="false" />
+		<param name="publish_distort" value="true" />
+		<param name="publish_color" value="false" />
+		<param name="publish_mono" value="false" />
+		<param name="topic" value="/camera/bottom"/>
+		<param name="frame" value="bottom_camera"/>
+		<param name="publish_scaled_mono" value="true" />
+		<param name="scaleX" value="640" />
+		<param name="scaleY" value="512" />
+		<rosparam file="$(find pauvsi_pgc_driver)/params/13Y3C_params.yaml"/>
+	</node>
   
   <node name="CameraCalibrator" pkg="pauvsi_m7" type="cameraCalibrator" output="screen">
   	<param name="cameraTopic" value="/PGCameraDriver/side/color/distorted" />

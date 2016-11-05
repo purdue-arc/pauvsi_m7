@@ -53,8 +53,8 @@ catkin_package(
 #add_executable(cameraDriver src/Utilities/PGCameraDriver.cpp)
 #target_link_libraries(cameraDriver ${POINTGREY_LIB} ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
-#add_executable(cameraCalibrator src/Utilities/cameraCalibrator.cpp)
-#target_link_libraries(cameraCalibrator ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+add_executable(cameraCalibrator src/Utilities/cameraCalibrator.cpp)
+target_link_libraries(cameraCalibrator ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 #add_executable(gridBasedLocalizer src/ComputerVision/gridBasedLocalizer.cpp)
 #target_link_libraries(gridBasedLocalizer ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES} gridLoc)
