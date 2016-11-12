@@ -17,9 +17,15 @@
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
+#include <tf2_ros/message_filter.h>
+#include <tf2_ros/transform_listener.h>
 
 
 #define DEFAULT_CAMERA_TOPIC "/camera/image"
+#define DEFAULT_ODOM_FRAME_NAME "odom"
+#define DEFAULT_CAMERA_FRAME_NAME "camera_frame"
+#define DEFAULT_COM_FRAME_NAME "base_link"
+#define DEFAULT_WORLD_FRAME_NAME "world"
 
 
 class Tracker
@@ -29,12 +35,25 @@ class Tracker
 	Tracker();
 	~Tracker();
 
+
+	//frames
+	std::string camera_frame;
+	std::string odom_frame;
+	std::string world_frame;
+
 	void cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam);
 	void readROSParameters();
 
 	std::string getCameraTopic(){
 			return cameraTopic;
 	}
+
+	void setK(cv::Mat _K)
+	{
+		K = _K;
+	}
+
+	cv::Mat get3x3FromVector(boost::array<double, 9> vec);
 
  protected:
 
@@ -44,6 +63,8 @@ class Tracker
 	cv::Mat inputImg;
 	std::string cameraTopic;
 
+	//Camera Parameter
+	cv::Mat K;
 };
 
 
