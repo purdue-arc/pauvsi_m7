@@ -24,7 +24,6 @@ Tracker::Tracker()
 
 }
 
-const int thresh = 100;
 
 void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam)
 {
@@ -32,6 +31,40 @@ void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor
 	//What is this? this->setK(get3x3FromVector(cam->K));
 	this->inputImg = cv_bridge::toCvShare(img, "mono8")->image.clone();
 
+
+	this->run();
+
+}
+
+cv::Mat Tracker::get3x3FromVector(boost::array<double, 9> vec)
+{
+	cv::Mat mat = cv::Mat(3,3, CV_32F);
+	for(int i=0; i<3; ++i)
+	{
+		mat.at<float>(i, 0) = vec.at(3 * i + 0);
+		mat.at<float>(i, 1) = vec.at(3 * i + 1);
+		mat.at<float>(i, 2) = vec.at(3 * i + 2);
+	}
+
+	//ROS_DEBUG_STREAM_ONCE("K = " << mat);
+	return mat;
+}
+
+void Tracker::readROSParameters()
+{
+	//CAMERA TOPIC
+	ROS_WARN_COND(!ros::param::has("~cameraTopic"), "Parameter for 'cameraTopic' has not been set");
+	ros::param::param<std::string>("~cameraTopic", cameraTopic, DEFAULT_CAMERA_TOPIC);
+	//ROS_DEBUG_STREAM("camera topic is: " << cameraTopic);
+
+	ros::param::param<std::string>("~camera_frame_name", camera_frame, DEFAULT_CAMERA_FRAME_NAME);
+	ros::param::param<std::string>("~odom_frame_name", odom_frame, DEFAULT_ODOM_FRAME_NAME);
+	ros::param::param<std::string>("~world_frame_name", world_frame, DEFAULT_WORLD_FRAME_NAME);
+}
+
+
+void Tracker::run()
+{
 	vector<GroundRobotPosition> results; 
 
 	Mat canny_output;
@@ -39,7 +72,7 @@ void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor
 	vector<Vec4i> hierarchy;
 
 	/// Detect edges using canny
-	Canny( this->inputImg, canny_output, thresh, thresh*2, 3 );
+	Canny( this->inputImg, canny_output, CANNY_THRESHOLD, CANNY_THRESHOLD*2, 3 );
 	/// Find contours
 	findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
@@ -77,8 +110,10 @@ void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor
 	//}
 
 	//this->roombaPos.publish(results);
+
 }
 
+<<<<<<< HEAD
 PoseEstimate::PoseEstimate() {
 
 	const std::string poseTopicName("/tracking/roombas");
@@ -90,6 +125,9 @@ PoseEstimate::PoseEstimate() {
 	//this->roombaPos = nh.advertise<std::vector<GroundRobotPosition> >(poseTopicName,publisherQueueSize,true);
 
 }
+=======
+
+>>>>>>> 81862fe8d264531cecafdb4150d59beb369bc77c
 
 int main(int argc, char** argv) {
 
