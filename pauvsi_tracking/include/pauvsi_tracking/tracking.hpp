@@ -4,7 +4,7 @@
 
 struct GroundRobotPosition {
 	double x, y, dx, dy, theta;
-}
+};
 
 
 #endif 
