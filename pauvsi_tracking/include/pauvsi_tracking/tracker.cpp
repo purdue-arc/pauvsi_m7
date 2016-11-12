@@ -24,7 +24,6 @@ Tracker::Tracker()
 
 }
 
-const int thresh = 100;
 
 void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam)
 {
@@ -39,7 +38,7 @@ void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor
 	vector<Vec4i> hierarchy;
 
 	/// Detect edges using canny
-	Canny( this->inputImg, canny_output, thresh, thresh*2, 3 );
+	Canny( this->inputImg, canny_output, CANNY_THRESHOLD, thresh*2, 3 );
 	/// Find contours
 	findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
@@ -100,7 +99,9 @@ void Tracker::readROSParameters()
 	ros::param::param<std::string>("~cameraTopic", cameraTopic, DEFAULT_CAMERA_TOPIC);
 	//ROS_DEBUG_STREAM("camera topic is: " << cameraTopic);
 
-
+	ros::param::param<std::string>("~camera_frame_name", camera_frame, DEFAULT_CAMERA_FRAME_NAME);
+	ros::param::param<std::string>("~odom_frame_name", odom_frame, DEFAULT_ODOM_FRAME_NAME);
+	ros::param::param<std::string>("~world_frame_name", world_frame, DEFAULT_WORLD_FRAME_NAME);
 }
 
 

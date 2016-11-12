@@ -8,8 +8,6 @@
 #ifndef PAUVSI_TRACKER_INCLUDE_TRACKER_H_
 #define PAUVSI_TRACKER_INCLUDE_TRACKER_H_
 
-#include <ros/ros.h>
-#include <ros/publisher.h>
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/video.hpp"
@@ -21,9 +19,11 @@
 #include <image_transport/image_transport.h>
 #include <tf2_ros/message_filter.h>
 #include <tf2_ros/transform_listener.h>
+#include <ros/ros.h>
+#include <ros/publisher.h>
 #include <vector>
 
-
+#define CANNY_THRESHOLD 100
 #define DEFAULT_CAMERA_TOPIC "/camera/image"
 #define DEFAULT_ODOM_FRAME_NAME "odom"
 #define DEFAULT_CAMERA_FRAME_NAME "camera_frame"
