@@ -113,7 +113,6 @@ void Tracker::run()
 
 }
 
-<<<<<<< HEAD
 PoseEstimate::PoseEstimate() {
 
 	const std::string poseTopicName("/tracking/roombas");
@@ -125,9 +124,6 @@ PoseEstimate::PoseEstimate() {
 	//this->roombaPos = nh.advertise<std::vector<GroundRobotPosition> >(poseTopicName,publisherQueueSize,true);
 
 }
-=======
-
->>>>>>> 81862fe8d264531cecafdb4150d59beb369bc77c
 
 int main(int argc, char** argv) {
 

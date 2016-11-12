@@ -36,7 +36,6 @@ class Tracker
  public:
 
 	Tracker(void);
-	~Tracker(void);
 
 
 	//frames
@@ -79,7 +78,7 @@ class PoseEstimate {
 
 		ros::Publisher roombaPos;
 	protected:
-		vector<Tracker> trackers;
+		std::vector<Tracker> trackers;
 		ros::NodeHandle nh;
 
 
