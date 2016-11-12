@@ -68,6 +68,8 @@ void Tracker::run2()
 	Mat imgHSV;
 	Mat imgThresholded;
 	cv::cvtColor(inputImg, imgHSV, cv::COLOR_BGR2HSV);
+	cv::inRange(imgHSV, Scalar(ILOWHUE, ILOWSATURATION, ILOWVALUE),
+						Scalar(IHIGHHUE, IHIGHSATURATION, IHIGHVALUE), imgThresholded);
 }
 */
 

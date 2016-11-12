@@ -24,6 +24,12 @@
 #include <vector>
 
 #define CANNY_THRESHOLD 100
+#define ILOWHUE 0
+#define	IHIGHHUE 179
+#define ILOWSATURATION 0
+#define IHIGHSATURATION 255
+#define ILOWVALUE 0
+#define IHIGHVALUE 255
 #define DEFAULT_CAMERA_TOPIC "/camera/image"
 #define DEFAULT_ODOM_FRAME_NAME "odom"
 #define DEFAULT_CAMERA_FRAME_NAME "camera_frame"
