@@ -19,12 +19,9 @@
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
-<<<<<<< HEAD
 #include <tf2_ros/message_filter.h>
 #include <tf2_ros/transform_listener.h>
-=======
 #include <vector>
->>>>>>> origin/master
 
 
 #define DEFAULT_CAMERA_TOPIC "/camera/image"
