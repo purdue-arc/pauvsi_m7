@@ -49,11 +49,18 @@ class Tracker
 
 };
 
+class PoseEstimate {
+	public:
+		PoseEstimate();
+		~PoseEstimate();
+
+		ros::Publisher roombaPos;
+	protected:
+		vector<Tracker> trackers;
+		ros::NodeHandle nh;
 
 
-
-
-
+};
 
 
 

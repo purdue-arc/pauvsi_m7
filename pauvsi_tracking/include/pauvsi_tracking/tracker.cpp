@@ -79,6 +79,18 @@ void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor
 	//this->roombaPos.publish(results);
 }
 
+PoseEstimate::PoseEstimate() {
+
+	const std::string poseTopicName("/tracking/roombas");
+	const uint32_t publisherQueueSize = 1;
+	for (int i = 0; i < 5; i++) {
+		Tracker foo;
+		trackers.push_back(foo);
+	}
+	//this->roombaPos = nh.advertise<std::vector<GroundRobotPosition> >(poseTopicName,publisherQueueSize,true);
+
+}
+
 int main(int argc, char** argv) {
 
 }
