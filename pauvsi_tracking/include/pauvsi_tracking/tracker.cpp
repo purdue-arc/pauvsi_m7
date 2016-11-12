@@ -67,7 +67,7 @@ void Tracker::run2()
 {
 	Mat imgHSV;
 	Mat imgThresholded;
-	cvt
+	cv::cvtColor(inputImg, imgHSV, cv::COLOR_BGR2HSV);
 }
 */
 
