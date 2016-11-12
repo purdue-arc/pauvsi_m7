@@ -38,7 +38,7 @@ void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor
 	vector<Vec4i> hierarchy;
 
 	/// Detect edges using canny
-	Canny( this->inputImg, canny_output, CANNY_THRESHOLD, thresh*2, 3 );
+	Canny( this->inputImg, canny_output, CANNY_THRESHOLD, CANNY_THRESHOLD*2, 3 );
 	/// Find contours
 	findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
 
