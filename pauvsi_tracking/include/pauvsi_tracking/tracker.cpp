@@ -62,9 +62,18 @@ void Tracker::readROSParameters()
 	ros::param::param<std::string>("~world_frame_name", world_frame, DEFAULT_WORLD_FRAME_NAME);
 }
 
+/*
+void Tracker::run2()
+{
+	Mat imgHSV;
+	Mat imgThresholded;
+	cvt
+}
+*/
 
 void Tracker::run()
 {
+
 	vector<GroundRobotPosition> results; 
 
 	Mat canny_output;
