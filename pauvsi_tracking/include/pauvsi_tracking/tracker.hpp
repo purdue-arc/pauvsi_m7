@@ -37,6 +37,10 @@
 #define DEFAULT_WORLD_FRAME_NAME "world"
 
 
+struct GroundRobotPosition {
+	double x, y, dx, dy, theta;
+};
+
 class Tracker
 {
  public:

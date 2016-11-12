@@ -6,8 +6,7 @@
  *
  */
 
-#include "tracker.h"
-#include "tracking.hpp"
+#include "tracker.hpp"
 
 using std::vector;
 using cv::Mat;
