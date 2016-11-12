@@ -56,6 +56,8 @@ class Tracker
 		K = _K;
 	}
 
+	void run();
+
 	cv::Mat get3x3FromVector(boost::array<double, 9> vec);
 
  protected:

@@ -31,6 +31,40 @@ void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor
 	//What is this? this->setK(get3x3FromVector(cam->K));
 	this->inputImg = cv_bridge::toCvShare(img, "mono8")->image.clone();
 
+
+	this->run();
+
+}
+
+cv::Mat Tracker::get3x3FromVector(boost::array<double, 9> vec)
+{
+	cv::Mat mat = cv::Mat(3,3, CV_32F);
+	for(int i=0; i<3; ++i)
+	{
+		mat.at<float>(i, 0) = vec.at(3 * i + 0);
+		mat.at<float>(i, 1) = vec.at(3 * i + 1);
+		mat.at<float>(i, 2) = vec.at(3 * i + 2);
+	}
+
+	//ROS_DEBUG_STREAM_ONCE("K = " << mat);
+	return mat;
+}
+
+void Tracker::readROSParameters()
+{
+	//CAMERA TOPIC
+	ROS_WARN_COND(!ros::param::has("~cameraTopic"), "Parameter for 'cameraTopic' has not been set");
+	ros::param::param<std::string>("~cameraTopic", cameraTopic, DEFAULT_CAMERA_TOPIC);
+	//ROS_DEBUG_STREAM("camera topic is: " << cameraTopic);
+
+	ros::param::param<std::string>("~camera_frame_name", camera_frame, DEFAULT_CAMERA_FRAME_NAME);
+	ros::param::param<std::string>("~odom_frame_name", odom_frame, DEFAULT_ODOM_FRAME_NAME);
+	ros::param::param<std::string>("~world_frame_name", world_frame, DEFAULT_WORLD_FRAME_NAME);
+}
+
+
+void Tracker::run()
+{
 	vector<GroundRobotPosition> results; 
 
 	Mat canny_output;
@@ -76,33 +110,9 @@ void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor
 	//}
 
 	//this->roombaPos.publish(results);
+
 }
 
-cv::Mat Tracker::get3x3FromVector(boost::array<double, 9> vec)
-{
-	cv::Mat mat = cv::Mat(3,3, CV_32F);
-	for(int i=0; i<3; ++i)
-	{
-		mat.at<float>(i, 0) = vec.at(3 * i + 0);
-		mat.at<float>(i, 1) = vec.at(3 * i + 1);
-		mat.at<float>(i, 2) = vec.at(3 * i + 2);
-	}
-
-	//ROS_DEBUG_STREAM_ONCE("K = " << mat);
-	return mat;
-}
-
-void Tracker::readROSParameters()
-{
-	//CAMERA TOPIC
-	ROS_WARN_COND(!ros::param::has("~cameraTopic"), "Parameter for 'cameraTopic' has not been set");
-	ros::param::param<std::string>("~cameraTopic", cameraTopic, DEFAULT_CAMERA_TOPIC);
-	//ROS_DEBUG_STREAM("camera topic is: " << cameraTopic);
-
-	ros::param::param<std::string>("~camera_frame_name", camera_frame, DEFAULT_CAMERA_FRAME_NAME);
-	ros::param::param<std::string>("~odom_frame_name", odom_frame, DEFAULT_ODOM_FRAME_NAME);
-	ros::param::param<std::string>("~world_frame_name", world_frame, DEFAULT_WORLD_FRAME_NAME);
-}
 
 
 int main(int argc, char** argv) {
