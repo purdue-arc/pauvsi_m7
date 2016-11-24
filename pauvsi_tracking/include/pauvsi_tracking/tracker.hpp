@@ -67,6 +67,8 @@ class Tracker
 
 	void run();
 
+	//For visualizing
+	void displayTargets();
 	cv::Mat get3x3FromVector(boost::array<double, 9> vec);
 
 

@@ -61,6 +61,48 @@ void Tracker::readROSParameters()
 	ros::param::param<std::string>("~world_frame_name", world_frame, DEFAULT_WORLD_FRAME_NAME);
 }
 
+void Tracker::displayTargets()
+{
+		cv::Mat display = this->inputImg;
+		for(int i=0; i<roombaPoses.size(); ++i)
+		{
+			cv::circle(display,Point(roombaPoses[i].x,roombaPoses[i].y),20,Scalar(0,255,0),2);
+			if(roombaPoses[i].y-25>0)
+				cv::line(display,Point(roombaPoses[i].x,roombaPoses[i].y),
+						Point(roombaPoses[i].x,roombaPoses[i].y-25),Scalar(0,255,0),2);
+			else
+				line(display,Point(roombaPoses[i].x,roombaPoses[i].y),
+		    		  Point(roombaPoses[i].x,0),Scalar(0,255,0),2);
+
+			if(roombaPoses[i].y+25<display.rows)
+				cv::line(display,Point(roombaPoses[i].x,roombaPoses[i].y),
+						Point(roombaPoses[i].x,roombaPoses[i].y-25),Scalar(0,255,0),2);
+			else
+				cv::line(display,Point(roombaPoses[i].x,roombaPoses[i].y),
+						Point(roombaPoses[i].x,display.rows),Scalar(0,255,0),2);
+
+			if(roombaPoses[i].x-25>0)
+				cv::line(display,Point(roombaPoses[i].x,roombaPoses[i].y),
+						Point(roombaPoses[i].x-25,roombaPoses[i].y),Scalar(0,255,0),2);
+			else
+				cv::line(display,Point(roombaPoses[i].x,roombaPoses[i].y),
+						Point(0,roombaPoses[i].y),Scalar(0,255,0),2);
+
+			if(roombaPoses[i].x+25<display.cols)
+				    cv::line(display,Point(roombaPoses[i].x,roombaPoses[i].y),
+				    		Point(roombaPoses[i].x+25,roombaPoses[i].y),Scalar(0,255,0),2);
+			else
+				cv::line(display,Point(roombaPoses[i].x,roombaPoses[i].y),
+						Point(display,roombaPoses[i].y),Scalar(0,255,0),2);
+		}
+
+
+
+	    cv::imshow("RoombaPoses Targets", display);
+
+
+
+}
 
 void Tracker::run()
 {
@@ -108,7 +150,7 @@ void Tracker::run()
 		}
 	}
 
-
+	displayTargets();
 
 }
 
