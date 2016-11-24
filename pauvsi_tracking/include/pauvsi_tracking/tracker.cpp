@@ -101,7 +101,7 @@ void Tracker::run()
 	for(int i=0; i<contours.size(); ++i)
 	{
 		//Ensure it's a roomba. Might be unnecessary
-		if(oMoments[i].m00 > 10000)
+		if(oMoments[i].m00 > 1000)
 		{
 			roombaPoses[i] = Point2f(oMoments[i].m10 / oMoments[i].m00 , oMoments[i].m01 / oMoments[i].m00);
 			ROS_WARN_STREAM("Position of"<< i+1<< "Roomba is: x:" << roombaPoses[i].x << " y:"<< roombaPoses[i].y << std::endl);
