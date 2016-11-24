@@ -69,6 +69,7 @@ class Tracker
 
 	cv::Mat get3x3FromVector(boost::array<double, 9> vec);
 
+
  protected:
 
 	ros::NodeHandle nh;
@@ -76,6 +77,9 @@ class Tracker
 	ros::Publisher roombaPos;
 	cv::Mat inputImg;
 	std::string cameraTopic;
+
+	//(x,y) positions of Roombas within image
+	std::vector<cv::Point2f> roombaPoses;
 
 	//Camera Parameter
 	cv::Mat K;

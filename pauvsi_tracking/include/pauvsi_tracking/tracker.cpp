@@ -80,28 +80,31 @@ void Tracker::run()
 	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
 
 	Mat imgCanny;
-	vector<vector<Point> > contours;
-	vector<Vec4i> hierarchy;
+	std::vector<vector<Point> > contours;
+	std::vector<Vec4i> hierarchy;
 
 	cv::Canny(imgThresholded, imgCanny, CANNY_THRESHOLD, CANNY_THRESHOLD*2);
 	cv::findContours( imgCanny, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
 
 	//Calculate the Moments
-	vector<cv::Moments>  oMoments(contours.size());
+	std::vector<cv::Moments>  oMoments(contours.size());
 
 	for(int i=0; i<contours.size(); ++i)
 	{
 		oMoments[i] = cv::moments(contours[i]);
 	}
 
-	vector<Point2f> roombaPos(contours.size());
+
+	//std::vector<Point2f> roombaPos(contours.size());
+	roombaPoses.resize(contours.size());
+
 	for(int i=0; i<contours.size(); ++i)
 	{
 		//Ensure it's a roomba. Might be unnecessary
 		if(oMoments[i].m00 > 10000)
 		{
-			roombaPos[i] = Point2f(oMoments[i].m10 / oMoments[i].m00 , oMoments[i].m01 / oMoments[i].m00);
-			ROS_WARN_STREAM("Position of"<< i+1<< "Roomba is: x:" << roombaPos[i].x << " y:"<< roombaPos[i].y << std::endl);
+			roombaPoses[i] = Point2f(oMoments[i].m10 / oMoments[i].m00 , oMoments[i].m01 / oMoments[i].m00);
+			ROS_WARN_STREAM("Position of"<< i+1<< "Roomba is: x:" << roombaPoses[i].x << " y:"<< roombaPoses[i].y << std::endl);
 		}
 	}
 
