@@ -61,17 +61,41 @@ void Tracker::readROSParameters()
 	ros::param::param<std::string>("~world_frame_name", world_frame, DEFAULT_WORLD_FRAME_NAME);
 }
 
-/*
-void Tracker::run2()
+
+void Tracker::run()
 {
 	Mat imgHSV;
 	Mat imgThresholded;
+	//TODO: Make sure input image is BGR and not RGB
 	cv::cvtColor(inputImg, imgHSV, cv::COLOR_BGR2HSV);
+	//TODO: GET HSV Range for the Red Roomba. (IMPORTANT!)
 	cv::inRange(imgHSV, Scalar(ILOWHUE, ILOWSATURATION, ILOWVALUE),
 						Scalar(IHIGHHUE, IHIGHSATURATION, IHIGHVALUE), imgThresholded);
-}
-*/
+	//Remove small objects from the foreground (Morphological Opening)
+	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5,5)));
+	cv::dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5,5)));
 
+	//Fill out small holes in the background (Morphological Closing)
+	cv::dilate( imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
+	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
+
+	//Calculate the Moments
+	cv::Moments oMoments = cv::moments(imgThresholded);
+	double dM01 = oMoments.m01;
+	double dM10 = oMoments.m10;
+	double dArea = oMoments.m00;
+
+	//Ensure the size
+	if(dArea > 10000)
+	{
+		int posX = dM10/dArea;
+		int posY = dM01/dArea;
+		ROS_WARN_STREAM("Position is: x:" << posX << " y:"<< posY << std::endl);
+	}
+
+}
+
+/*
 void Tracker::run()
 {
 
@@ -122,7 +146,7 @@ void Tracker::run()
 	//this->roombaPos.publish(results);
 
 }
-
+*/
 PoseEstimate::PoseEstimate() {
 
 	const std::string poseTopicName("/tracking/roombas");
@@ -134,6 +158,7 @@ PoseEstimate::PoseEstimate() {
 	//this->roombaPos = nh.advertise<std::vector<GroundRobotPosition> >(poseTopicName,publisherQueueSize,true);
 
 }
+
 
 int main(int argc, char** argv) {
 
