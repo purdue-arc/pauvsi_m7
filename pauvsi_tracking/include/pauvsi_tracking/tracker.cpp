@@ -219,6 +219,24 @@ void Tracker::getWorldPosition()
 		ROS_WARN_STREAM("\n Roomba "<<i+1<<" Position: "<< worldRoombaPosition[i]);
 	}
 
+
+	tf::TransformBroadcaster br;
+	for(int i=0; i<worldRoombaPosition.size(); ++i)
+	{
+		tf::Transform transform;
+		transform.setOrigin(worldRoombaPosition[i]);
+		tf::Quaternion q;
+		q.setRPY(0,0,0);
+		transform.setRotation(q);
+//		char buffer[50];
+
+//		std::sprintf(buffer, "%s Roomba %d", this->camera_frame, i);
+		br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), this->world_frame,
+						std::string(this->camera_frame + " Roomba " + boost::lexical_cast<std::string>(i))));
+//		br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), this->world_frame,
+//								buffer));
+	}
+
 }
 
 /*

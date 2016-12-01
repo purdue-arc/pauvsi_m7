@@ -15,6 +15,7 @@
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
 #include <stdio.h>
+#include <boost/lexical_cast.hpp>
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
@@ -27,6 +28,7 @@
 #include <ros/ros.h>
 #include <ros/publisher.h>
 #include <vector>
+#include <string.h>
 
 #define CANNY_THRESHOLD 100
 #define ILOWHUE 0
