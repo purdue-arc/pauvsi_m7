@@ -18,6 +18,8 @@ using cv::Scalar;
 
 Tracker::Tracker()
 {
+	this->readROSParameters();
+
 	image_transport::ImageTransport it(nh);
 	this->cameraSub = it.subscribeCamera(this->getCameraTopic(), 1, &Tracker::cameraCallback, this);
 
@@ -26,6 +28,11 @@ Tracker::Tracker()
 
 void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam)
 {
+
+	//set the K and D matrices
+	this->setK(get3x3FromVector(cam->K));
+	this->setD(cv::Mat(cam->D, false));
+
 
 	//What is this? this->setK(get3x3FromVector(cam->K));
 	this->inputImg = cv_bridge::toCvShare(img, "mono8")->image.clone();
@@ -93,12 +100,14 @@ void Tracker::displayTargets()
 				    		Point(roombaPoses[i].x+25,roombaPoses[i].y),Scalar(0,255,0),2);
 			else
 				cv::line(display,Point(roombaPoses[i].x,roombaPoses[i].y),
-						Point(display,roombaPoses[i].y),Scalar(0,255,0),2);
+						Point(display.cols,roombaPoses[i].y),Scalar(0,255,0),2);
 		}
 
 
 
 	    cv::imshow("RoombaPoses Targets", display);
+	    cv::waitKey(30);
+
 
 
 
@@ -138,19 +147,77 @@ void Tracker::run()
 
 
 	//std::vector<Point2f> roombaPos(contours.size());
-	roombaPoses.resize(contours.size());
+	//roombaPoses.resize(contours.size());
 
 	for(int i=0; i<contours.size(); ++i)
 	{
 		//Ensure it's a roomba. Might be unnecessary
 		if(oMoments[i].m00 > 1000)
 		{
-			roombaPoses[i] = Point2f(oMoments[i].m10 / oMoments[i].m00 , oMoments[i].m01 / oMoments[i].m00);
+			roombaPoses.push_back(Point2f(oMoments[i].m10 / oMoments[i].m00 , oMoments[i].m01 / oMoments[i].m00));
+			//roombaPoses[i] = ;
 			ROS_WARN_STREAM("Position of"<< i+1<< "Roomba is: x:" << roombaPoses[i].x << " y:"<< roombaPoses[i].y << std::endl);
 		}
 	}
 
 	displayTargets();
+
+}
+
+void Tracker::getWorldPosition()
+{
+	static tf::TransformListener listener;
+	tf::StampedTransform camToWorld;
+	listener.lookupTransform(this->camera_frame, this->world_frame, ros::Time(0), camToWorld);
+
+	// [u v]
+	vector<cv::Point2f> undistortedPoses;
+	cv::fisheye::undistortPoints(roombaPoses, undistortedPoses, this->K, this->D);
+
+	// [u v 1] format
+	vector<tf::Vector3> projectedPoses;
+	for(int i=0; i<undistortedPoses.size(); ++i)
+	{
+		projectedPoses.push_back(tf::Vector3(undistortedPoses[i].x, undistortedPoses[i].y, 1));
+	}
+
+	//[x y z] of projected points in world coordinate frame
+	vector<tf::Vector3> worldProjectedPoses;
+	tf::Vector3 cameraPos;
+
+	cameraPos = camToWorld * tf::Vector3(0, 0, 0);
+
+
+	for(int i=0; i<projectedPoses.size(); ++i)
+	{
+		worldProjectedPoses.push_back(camToWorld * (tf::Vector3(projectedPoses[i])));
+
+	}
+
+	//Positions of roombas in world Coordinate frame
+	vector<tf::Vector3> worldRoombaPosition;
+	//vector along line [a b c]
+	tf::Vector3 lineVector;
+	// parameter t for line vector
+	double lineParameter;
+
+	for(int i=0; i<worldProjectedPoses.size(); ++i)
+	{
+		// [ a b c]
+		lineVector = worldProjectedPoses[i] - cameraPos;
+		// t = (z-zo)/c
+		lineParameter = (ROOMBA_HEIGHT - cameraPos.getZ())/lineVector.getZ();
+
+
+		worldRoombaPosition.push_back(tf::Vector3(cameraPos.getX() + lineParameter*lineVector.getX(),
+													 cameraPos.getY() + lineParameter*lineVector.getY(),
+													 ROOMBA_HEIGHT));
+	}
+
+	for(int i = 0; i<worldRoombaPosition.size(); ++i)
+	{
+		ROS_WARN_STREAM("\n Roomba "<<i+1<<" Position: "<< worldRoombaPosition[i]);
+	}
 
 }
 

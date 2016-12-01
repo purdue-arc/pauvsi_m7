@@ -9,6 +9,7 @@
 #define PAUVSI_TRACKER_INCLUDE_TRACKER_H_
 
 
+#include <opencv2/calib3d.hpp>
 #include "opencv2/core/core.hpp"
 #include "opencv2/video.hpp"
 #include "opencv2/imgproc.hpp"
@@ -19,6 +20,10 @@
 #include <image_transport/image_transport.h>
 #include <tf2_ros/message_filter.h>
 #include <tf2_ros/transform_listener.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf/message_filter.h>
+#include <tf/transform_broadcaster.h>
+#include <tf/transform_listener.h>
 #include <ros/ros.h>
 #include <ros/publisher.h>
 #include <vector>
@@ -30,6 +35,7 @@
 #define IHIGHSATURATION 255
 #define ILOWVALUE 0
 #define IHIGHVALUE 255
+#define ROOMBA_HEIGHT 0.09
 #define DEFAULT_CAMERA_TOPIC "/camera/image"
 #define DEFAULT_ODOM_FRAME_NAME "odom"
 #define DEFAULT_CAMERA_FRAME_NAME "camera_frame"
@@ -65,10 +71,18 @@ class Tracker
 		K = _K;
 	}
 
+	void setD(cv::Mat _D)
+	{
+		D = _D;
+	}
+
 	void run();
+
+	void getWorldPosition();
 
 	//For visualizing
 	void displayTargets();
+
 	cv::Mat get3x3FromVector(boost::array<double, 9> vec);
 
 
@@ -83,8 +97,9 @@ class Tracker
 	//(x,y) positions of Roombas within image
 	std::vector<cv::Point2f> roombaPoses;
 
-	//Camera Parameter
+	//Camera Parameter (Intrinsic and distortion)
 	cv::Mat K;
+	cv::Mat D;
 };
 
 class PoseEstimate {
