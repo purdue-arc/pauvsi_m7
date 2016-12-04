@@ -23,6 +23,14 @@ Tracker::Tracker()
 	image_transport::ImageTransport it(nh);
 	this->cameraSub = it.subscribeCamera(this->getCameraTopic(), 1, &Tracker::cameraCallback, this);
 
+	ILOWHUE = 0;
+	IHIGHHUE = 256;
+	ILOWSATURATION = 0;
+	IHIGHSATURATION = 256;
+	ILOWVALUE = 0;
+	IHIGHVALUE = 256;
+
+	createTrackBars();
 }
 
 
@@ -113,6 +121,30 @@ void Tracker::displayTargets()
 
 }
 
+void Tracker::createTrackBars()
+{
+	const std::string trackbarWindowName = "Trackbars";
+
+    cv::namedWindow(trackbarWindowName,0);
+	//create memory to store trackbar name on window
+/*	char TrackbarName[50];
+	std::sprintf( TrackbarName, "H_MIN", ILOWHUE);
+	std::sprintf( TrackbarName, "H_MAX", IHIGHHUE);
+	std::sprintf( TrackbarName, "S_MIN", ILOWSATURATION);
+	std::sprintf( TrackbarName, "S_MAX", IHIGHSATURATION);
+	std::sprintf( TrackbarName, "V_MIN", ILOWVALUE);
+	std::sprintf( TrackbarName, "V_MAX", IHIGHVALUE);
+*/
+
+    cv::createTrackbar( "H_MIN", trackbarWindowName, &ILOWHUE, IHIGHHUE);
+    cv::createTrackbar( "H_MAX", trackbarWindowName, &IHIGHHUE, IHIGHHUE);
+    cv::createTrackbar( "S_MIN", trackbarWindowName, &ILOWSATURATION, IHIGHSATURATION);
+    cv::createTrackbar( "S_MAX", trackbarWindowName, &IHIGHSATURATION, IHIGHSATURATION);
+    cv::createTrackbar( "V_MIN", trackbarWindowName, &ILOWVALUE, IHIGHVALUE);
+    cv::createTrackbar( "V_MAX", trackbarWindowName, &IHIGHVALUE, IHIGHVALUE);
+
+}
+
 void Tracker::run()
 {
 	Mat imgHSV;
@@ -122,6 +154,10 @@ void Tracker::run()
 	//TODO: GET HSV Range for the Red Roomba. (IMPORTANT!)
 	cv::inRange(imgHSV, Scalar(ILOWHUE, ILOWSATURATION, ILOWVALUE),
 						Scalar(IHIGHHUE, IHIGHSATURATION, IHIGHVALUE), imgThresholded);
+	cv::imshow("Thresholded image", imgThresholded);
+	return;
+
+
 	//Remove small objects from the foreground (Morphological Opening)
 	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5,5)));
 	cv::dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5,5)));
@@ -304,7 +340,4 @@ PoseEstimate::PoseEstimate() {
 }
 
 
-int main(int argc, char** argv) {
-
-}
 

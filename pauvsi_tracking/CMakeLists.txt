@@ -18,8 +18,6 @@ find_package(OpenCV REQUIRED)
 #add_library(tracking include/pauvsi_tracking/tracking.hpp)
 #target_link_libraries(tracking ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
-add_executable(tracker include/pauvsi_tracking/tracker.cpp)
-target_link_libraries(tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -127,6 +125,13 @@ catkin_package(
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
+
+add_library(tracker include/pauvsi_tracking/tracker.cpp)
+
+add_executable(pauvsi_tracker src/pauvsi_tracking.cpp)
+
+target_link_libraries(tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+target_link_libraries(pauvsi_tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} tracker)
 
 ## Declare a C++ library
 # add_library(pauvsi_tracking

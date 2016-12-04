@@ -31,12 +31,12 @@
 #include <string.h>
 
 #define CANNY_THRESHOLD 100
-#define ILOWHUE 0
-#define	IHIGHHUE 179
-#define ILOWSATURATION 0
-#define IHIGHSATURATION 255
-#define ILOWVALUE 0
-#define IHIGHVALUE 255
+#define REDILOWHUE 0
+#define	REDIHIGHHUE 179
+#define REDILOWSATURATION 0
+#define REDIHIGHSATURATION 255
+#define REDILOWVALUE 0
+#define REDIHIGHVALUE 255
 #define ROOMBA_HEIGHT 0.09
 #define DEFAULT_CAMERA_TOPIC "/camera/image"
 #define DEFAULT_ODOM_FRAME_NAME "odom"
@@ -78,6 +78,8 @@ class Tracker
 		D = _D;
 	}
 
+	void createTrackBars();
+
 	void run();
 
 	void getWorldPosition();
@@ -90,6 +92,12 @@ class Tracker
 
  protected:
 
+	int ILOWHUE;
+	int IHIGHHUE;
+	int ILOWSATURATION;
+	int IHIGHSATURATION;
+	int ILOWVALUE;
+	int IHIGHVALUE;
 	ros::NodeHandle nh;
 	image_transport::CameraSubscriber cameraSub;
 	ros::Publisher roombaPos;
