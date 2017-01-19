@@ -253,7 +253,10 @@ void Tracker::getWorldPosition()
 
 	for(auto e: worldProjectedPoses)
 	{
+		//r = r. + tv
+		//V = [a b c]
 		lineVector = e - cameraPos;
+		// t = (z-z.)/c
 		lineParameter = (ROOMBA_HEIGHT - cameraPos.getZ())/lineVector.getZ();
 
 		worldRoombaPosition.push_back(tf::Vector3(cameraPos.getX() + lineParameter*lineVector.getX(),
