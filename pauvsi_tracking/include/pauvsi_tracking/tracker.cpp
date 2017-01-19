@@ -203,8 +203,16 @@ void Tracker::run()
 void Tracker::getWorldPosition()
 {
 	static tf::TransformListener listener;
-	tf::StampedTransform camToWorld;
-	listener.lookupTransform(this->camera_frame, this->world_frame, ros::Time(0), camToWorld);
+	tf::StampedTransform worldToCam; // actually world to cam
+	//NOTE: If you multiply WorldToCam with a pos in world frame, then you'll get a pos in cam coord frame
+	try
+	{
+		listener.lookupTransform(this->camera_frame, this->world_frame, ros::Time(ros::Time(0)), worldToCam);
+	}
+	catch(tf::TransformException &e)
+	{
+		ROS_WARN_STREAM(e.what());
+	}
 
 	// [u v]
 	vector<cv::Point2f> undistortedPoses;
@@ -221,15 +229,21 @@ void Tracker::getWorldPosition()
 	vector<tf::Vector3> worldProjectedPoses;
 	tf::Vector3 cameraPos;
 
-	cameraPos = camToWorld * tf::Vector3(0, 0, 0);
+	cameraPos = worldToCam.getOrigin(); //Origin of cam in world frame
 
+	tf::Transform camToWorld = worldToCam.inverse();
 
-	for(int i=0; i<projectedPoses.size(); ++i)
+	for(auto e : projectedPoses)
 	{
-		worldProjectedPoses.push_back(camToWorld * (tf::Vector3(projectedPoses[i])));
-
+		worldProjectedPoses.push_back(camToWorld * (tf::Vector3(e))); // will give point in woorld coord
 	}
 
+	/*for(int i=0; i<projectedPoses.size(); ++i)
+	{
+		worldProjectedPoses.push_back(camToWorld * (tf::Vector3(projectedPoses[i]))); // will give point in woorld coord
+
+	}
+	*/
 	//Positions of roombas in world Coordinate frame
 	vector<tf::Vector3> worldRoombaPosition;
 	//vector along line [a b c]
@@ -237,7 +251,17 @@ void Tracker::getWorldPosition()
 	// parameter t for line vector
 	double lineParameter;
 
-	for(int i=0; i<worldProjectedPoses.size(); ++i)
+	for(auto e: worldProjectedPoses)
+	{
+		lineVector = e - cameraPos;
+		lineParameter = (ROOMBA_HEIGHT - cameraPos.getZ())/lineVector.getZ();
+
+		worldRoombaPosition.push_back(tf::Vector3(cameraPos.getX() + lineParameter*lineVector.getX(),
+													cameraPos.getY() + lineParameter*lineVector.getY(),
+													ROOMBA_HEIGHT));
+	}
+
+/*	for(int i=0; i<worldProjectedPoses.size(); ++i)
 	{
 		// [ a b c]
 		lineVector = worldProjectedPoses[i] - cameraPos;
@@ -249,6 +273,8 @@ void Tracker::getWorldPosition()
 													 cameraPos.getY() + lineParameter*lineVector.getY(),
 													 ROOMBA_HEIGHT));
 	}
+*/
+
 
 	for(int i = 0; i<worldRoombaPosition.size(); ++i)
 	{
