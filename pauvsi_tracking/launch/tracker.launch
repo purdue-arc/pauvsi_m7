@@ -1,0 +1,6 @@
+<launch>
+	<node name="roomba_tracker" pkg="pauvsi_tracking" type="roomba_tracker" output="screen" >
+		<param name="cameraTopic" value="/bottomCamera/image_color" />
+	</node>
+
+</launch>

@@ -21,30 +21,41 @@ Tracker::Tracker()
 	this->readROSParameters();
 
 	image_transport::ImageTransport it(nh);
+
 	this->cameraSub = it.subscribeCamera(this->getCameraTopic(), 1, &Tracker::cameraCallback, this);
 
-	ILOWHUE = 0;
-	IHIGHHUE = 256;
-	ILOWSATURATION = 0;
-	IHIGHSATURATION = 256;
-	ILOWVALUE = 0;
+	ROS_DEBUG_STREAM(cameraSub.getInfoTopic());
+	ROS_DEBUG_STREAM(cameraSub.getTopic());
+	ROS_DEBUG_STREAM(cameraSub.getTransport());
+
+	//current Values
+	ILOWHUE = 1; //maybe 0
+	IHIGHHUE = 6;
+	ILOWSATURATION = 170;
+	IHIGHSATURATION = 228;
+	ILOWVALUE = 210;
 	IHIGHVALUE = 256;
 
-	createTrackBars();
+
+	ROS_DEBUG_STREAM("Done");
+
 }
 
 
 void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam)
 {
-
+//	this->createTrackBars();
+	ROS_DEBUG_STREAM("Listening To Camera: In callback");
 	//set the K and D matrices
 	this->setK(get3x3FromVector(cam->K));
 	this->setD(cv::Mat(cam->D, false));
 
 
 	//What is this? this->setK(get3x3FromVector(cam->K));
-	this->inputImg = cv_bridge::toCvShare(img, "mono8")->image.clone();
+	this->inputImg = cv_bridge::toCvShare(img, "bgr8")->image.clone();
 
+//	cv::imshow("input", this->inputImg);
+//	cv::waitKey(30);
 
 	this->run();
 
@@ -69,7 +80,7 @@ void Tracker::readROSParameters()
 	//CAMERA TOPIC
 	ROS_WARN_COND(!ros::param::has("~cameraTopic"), "Parameter for 'cameraTopic' has not been set");
 	ros::param::param<std::string>("~cameraTopic", cameraTopic, DEFAULT_CAMERA_TOPIC);
-	//ROS_DEBUG_STREAM("camera topic is: " << cameraTopic);
+	ROS_DEBUG_STREAM("camera topic is: " << cameraTopic);
 
 	ros::param::param<std::string>("~camera_frame_name", camera_frame, DEFAULT_CAMERA_FRAME_NAME);
 	ros::param::param<std::string>("~odom_frame_name", odom_frame, DEFAULT_ODOM_FRAME_NAME);
@@ -114,7 +125,7 @@ void Tracker::displayTargets()
 
 
 	    cv::imshow("RoombaPoses Targets", display);
-	    cv::waitKey(30);
+	    cv::waitKey(1000);
 
 
 
@@ -125,16 +136,18 @@ void Tracker::createTrackBars()
 {
 	const std::string trackbarWindowName = "Trackbars";
 
-    cv::namedWindow(trackbarWindowName,0);
+    cv::namedWindow(trackbarWindowName, CV_WINDOW_AUTOSIZE);
+
+    cv::waitKey(30);
 	//create memory to store trackbar name on window
-/*	char TrackbarName[50];
+	char TrackbarName[50];
 	std::sprintf( TrackbarName, "H_MIN", ILOWHUE);
 	std::sprintf( TrackbarName, "H_MAX", IHIGHHUE);
 	std::sprintf( TrackbarName, "S_MIN", ILOWSATURATION);
 	std::sprintf( TrackbarName, "S_MAX", IHIGHSATURATION);
 	std::sprintf( TrackbarName, "V_MIN", ILOWVALUE);
 	std::sprintf( TrackbarName, "V_MAX", IHIGHVALUE);
-*/
+
 
     cv::createTrackbar( "H_MIN", trackbarWindowName, &ILOWHUE, IHIGHHUE);
     cv::createTrackbar( "H_MAX", trackbarWindowName, &IHIGHHUE, IHIGHHUE);
@@ -143,10 +156,12 @@ void Tracker::createTrackBars()
     cv::createTrackbar( "V_MIN", trackbarWindowName, &ILOWVALUE, IHIGHVALUE);
     cv::createTrackbar( "V_MAX", trackbarWindowName, &IHIGHVALUE, IHIGHVALUE);
 
+    ROS_DEBUG_STREAM("Hit");
 }
 
 void Tracker::run()
 {
+	ROS_DEBUG_STREAM("iN RUN");
 	Mat imgHSV;
 	Mat imgThresholded;
 	//TODO: Make sure input image is BGR and not RGB
@@ -155,6 +170,7 @@ void Tracker::run()
 	cv::inRange(imgHSV, Scalar(ILOWHUE, ILOWSATURATION, ILOWVALUE),
 						Scalar(IHIGHHUE, IHIGHSATURATION, IHIGHVALUE), imgThresholded);
 	cv::imshow("Thresholded image", imgThresholded);
+	cv::waitKey(30);
 	return;
 
 
