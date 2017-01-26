@@ -122,7 +122,7 @@ void Tracker::displayTargets()
 						Point(display.cols,roombaPoses[i].y),Scalar(0,255,0),2);
 		}
 
-
+		roombaPoses.clear();
 
 	    cv::imshow("RoombaPoses Targets", display);
 	    cv::waitKey(1000);
@@ -169,10 +169,10 @@ void Tracker::run()
 	//TODO: GET HSV Range for the Red Roomba. (IMPORTANT!)
 	cv::inRange(imgHSV, Scalar(ILOWHUE, ILOWSATURATION, ILOWVALUE),
 						Scalar(IHIGHHUE, IHIGHSATURATION, IHIGHVALUE), imgThresholded);
-	cv::imshow("Thresholded image", imgThresholded);
+/*	cv::imshow("Thresholded image", imgThresholded);
 	cv::waitKey(30);
 	return;
-
+*/
 
 	//Remove small objects from the foreground (Morphological Opening)
 	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5,5)));
@@ -181,6 +181,7 @@ void Tracker::run()
 	//Fill out small holes in the background (Morphological Closing)
 	cv::dilate( imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
 	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
+
 
 	Mat imgCanny;
 	std::vector<vector<Point> > contours;
