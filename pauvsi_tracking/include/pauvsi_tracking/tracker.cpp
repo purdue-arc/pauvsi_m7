@@ -183,10 +183,6 @@ void Tracker::run()
 	cv::dilate( imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(6, 6)) );
 	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(6, 6)) );
 
-/*	cv::imshow("Thresholded image", imgThresholded);
-	cv::waitKey(30);
-	return;
-*/
 
 	Mat imgCanny;
 	std::vector<vector<Point> > contours;
@@ -222,10 +218,11 @@ void Tracker::run()
 
 
 	cv::imshow("Vanny image", imgCanny);
-			cv::waitKey(30);
-			return;
-			roombaPoses.clear();
-	//displayTargets();
+		cv::waitKey(30);
+		roombaPoses.clear(); //actually remove after getting worldPos
+
+		return;
+		//displayTargets();
 
 }
 
