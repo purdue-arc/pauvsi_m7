@@ -92,8 +92,8 @@ void Tracker::displayTargets()
 		cv::Mat display = this->inputImg;
 		for(int i=0; i<roombaPoses.size(); ++i)
 		{
-			cv::circle(display,Point(roombaPoses[i].x,roombaPoses[i].y),20,Scalar(0,255,0),2);
-			if(roombaPoses[i].y-25>0)
+			cv::circle(display,Point(roombaPoses[i].x,roombaPoses[i].y),5,Scalar(0,255,0),2);
+/*			if(roombaPoses[i].y-25>0)
 				cv::line(display,Point(roombaPoses[i].x,roombaPoses[i].y),
 						Point(roombaPoses[i].x,roombaPoses[i].y-25),Scalar(0,255,0),2);
 			else
@@ -120,7 +120,7 @@ void Tracker::displayTargets()
 			else
 				cv::line(display,Point(roombaPoses[i].x,roombaPoses[i].y),
 						Point(display.cols,roombaPoses[i].y),Scalar(0,255,0),2);
-		}
+*/		}
 
 		roombaPoses.clear();
 
@@ -205,7 +205,7 @@ void Tracker::run()
 	for(int i=0; i<contours.size(); ++i)
 	{
 		//Ensure it's a roomba. Might be unnecessary
-		if(oMoments[i].m00 > 1000)
+		if(oMoments[i].m00 > 300)
 		{
 			roombaPoses.push_back(Point2f(oMoments[i].m10 / oMoments[i].m00 , oMoments[i].m01 / oMoments[i].m00));
 			//roombaPoses[i] = ;
