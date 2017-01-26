@@ -29,11 +29,11 @@ Tracker::Tracker()
 	ROS_DEBUG_STREAM(cameraSub.getTransport());
 
 	//current Values
-	ILOWHUE = 1; //maybe 0
-	IHIGHHUE = 6;
-	ILOWSATURATION = 170;
-	IHIGHSATURATION = 228;
-	ILOWVALUE = 210;
+	ILOWHUE = 0;//1; //maybe 0
+	IHIGHHUE = 5;//6;
+	ILOWSATURATION = 150;//170;
+	IHIGHSATURATION = 231;//228;
+	ILOWVALUE = 165;//210;
 	IHIGHVALUE = 256;
 
 
@@ -44,7 +44,7 @@ Tracker::Tracker()
 
 void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam)
 {
-//	this->createTrackBars();
+	//this->createTrackBars();
 	ROS_DEBUG_STREAM("Listening To Camera: In callback");
 	//set the K and D matrices
 	this->setK(get3x3FromVector(cam->K));
@@ -53,6 +53,7 @@ void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor
 
 	//What is this? this->setK(get3x3FromVector(cam->K));
 	this->inputImg = cv_bridge::toCvShare(img, "bgr8")->image.clone();
+	//cv::resize(inputImg, inputImg, cv::Size(), 0.5, 0.5);
 
 //	cv::imshow("input", this->inputImg);
 //	cv::waitKey(30);
@@ -175,13 +176,17 @@ void Tracker::run()
 */
 
 	//Remove small objects from the foreground (Morphological Opening)
-	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5,5)));
-	cv::dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5,5)));
+	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(6,6)));
+	cv::dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(6,6)));
 
 	//Fill out small holes in the background (Morphological Closing)
-	cv::dilate( imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
-	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)) );
+	cv::dilate( imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(6, 6)) );
+	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(6, 6)) );
 
+/*	cv::imshow("Thresholded image", imgThresholded);
+	cv::waitKey(30);
+	return;
+*/
 
 	Mat imgCanny;
 	std::vector<vector<Point> > contours;
@@ -189,6 +194,8 @@ void Tracker::run()
 
 	cv::Canny(imgThresholded, imgCanny, CANNY_THRESHOLD, CANNY_THRESHOLD*2);
 	cv::findContours( imgCanny, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+
+
 
 	//Calculate the Moments
 	std::vector<cv::Moments>  oMoments(contours.size());
@@ -213,7 +220,12 @@ void Tracker::run()
 		}
 	}
 
-	displayTargets();
+
+	cv::imshow("Vanny image", imgCanny);
+			cv::waitKey(30);
+			return;
+			roombaPoses.clear();
+	//displayTargets();
 
 }
 
