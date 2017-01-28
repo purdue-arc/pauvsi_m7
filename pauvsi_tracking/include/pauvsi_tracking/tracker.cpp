@@ -28,12 +28,14 @@ Tracker::Tracker()
 	ROS_DEBUG_STREAM(cameraSub.getTopic());
 	ROS_DEBUG_STREAM(cameraSub.getTransport());
 
+	//(RGB = 176,22,4) HSV = 6.28, 97.73, 69.02; HSV = 4.5, 250.2, 176.69
+
 	//current Values
 	ILOWHUE = 0;//1; //maybe 0
-	IHIGHHUE = 5;//6;
-	ILOWSATURATION = 150;//170;
-	IHIGHSATURATION = 231;//228;
-	ILOWVALUE = 165;//210;
+	IHIGHHUE = 8;//5;//6;
+	ILOWSATURATION = 165;//150;//120;
+	IHIGHSATURATION = 256;//231;//228;
+	ILOWVALUE = 105;//165;//210;
 	IHIGHVALUE = 256;
 
 
@@ -126,7 +128,7 @@ void Tracker::displayTargets()
 		roombaPoses.clear();
 
 	    cv::imshow("RoombaPoses Targets", display);
-	    cv::waitKey(1000);
+	    cv::waitKey(5);
 
 
 
@@ -170,18 +172,20 @@ void Tracker::run()
 	//TODO: GET HSV Range for the Red Roomba. (IMPORTANT!)
 	cv::inRange(imgHSV, Scalar(ILOWHUE, ILOWSATURATION, ILOWVALUE),
 						Scalar(IHIGHHUE, IHIGHSATURATION, IHIGHVALUE), imgThresholded);
+
 /*	cv::imshow("Thresholded image", imgThresholded);
 	cv::waitKey(30);
 	return;
 */
 
 	//Remove small objects from the foreground (Morphological Opening)
-	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(6,6)));
-	cv::dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(6,6)));
+	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(8,8)));
+	cv::dilate(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(8,8)));
 
 	//Fill out small holes in the background (Morphological Closing)
 	cv::dilate( imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(6, 6)) );
 	cv::erode(imgThresholded, imgThresholded, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(6, 6)) );
+
 
 
 	Mat imgCanny;
@@ -208,7 +212,7 @@ void Tracker::run()
 	for(int i=0; i<contours.size(); ++i)
 	{
 		//Ensure it's a roomba. Might be unnecessary
-		if(oMoments[i].m00 > 300)
+		if(oMoments[i].m00 > 500)
 		{
 			roombaPoses.push_back(Point2f(oMoments[i].m10 / oMoments[i].m00 , oMoments[i].m01 / oMoments[i].m00));
 			//roombaPoses[i] = ;
@@ -217,12 +221,9 @@ void Tracker::run()
 	}
 
 
-	cv::imshow("Vanny image", imgCanny);
-		cv::waitKey(30);
-		roombaPoses.clear(); //actually remove after getting worldPos
-
+		displayTargets();
 		return;
-		//displayTargets();
+
 
 }
 
@@ -284,6 +285,9 @@ void Tracker::getWorldPosition()
 		lineVector = e - cameraPos;
 		// t = (z-z.)/c
 		lineParameter = (ROOMBA_HEIGHT - cameraPos.getZ())/lineVector.getZ();
+
+		//Due to vision, one roomba could have two positions. Remove this by looking at
+		//roomba size and averaging the nearby points into one roomba position
 
 		worldRoombaPosition.push_back(tf::Vector3(cameraPos.getX() + lineParameter*lineVector.getX(),
 													cameraPos.getY() + lineParameter*lineVector.getY(),

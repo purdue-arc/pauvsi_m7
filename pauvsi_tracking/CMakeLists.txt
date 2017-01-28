@@ -12,8 +12,11 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
   roscpp
+  cmake_modules
   tf
 )
+
+find_package(Eigen3 REQUIRED)
 
 find_package(OpenCV REQUIRED)
 
@@ -64,7 +67,7 @@ catkin_package(
   INCLUDE_DIRS include
 #  LIBRARIES pauvsi_tracking
 #  CATKIN_DEPENDS cv_bridge image_transport roscpp tf
-  DEPENDS system_lib opencv
+  DEPENDS eigen system_lib opencv
 )
 
 ###########
@@ -76,14 +79,15 @@ catkin_package(
 # include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${Eigen_INCLUDE_DIRS}
 )
 
 add_library(tracker include/pauvsi_tracking/tracker.cpp)
 
 add_executable(roomba_tracker src/pauvsi_tracking.cpp)
 
-target_link_libraries(tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-target_link_libraries(roomba_tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} tracker)
+target_link_libraries(tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES})
+target_link_libraries(roomba_tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES}  tracker)
 
 ## Declare a C++ library
 # add_library(pauvsi_tracking
