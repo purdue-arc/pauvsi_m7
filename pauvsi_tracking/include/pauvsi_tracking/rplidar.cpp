@@ -97,7 +97,9 @@ void ObstacleDetector::run()
 //				obstaclePoses.push_back(e);
 		}
 	}
-
+//TODO: Account for rotation time
+//TODO: to remove copies find distance in xy plane, remove eif below threshold
+// Eg: if pt 5 is no longer the same as pt 1, then pt6 will not be same as pt 1, due to rotation in angle
 	this->obstaclePublisher.publish(obstaclePoses);
 //	this->lidarInput.ranges.size();
 
