@@ -1,0 +1,8 @@
+<launch>
+	<include file="$(find rplidar_ros)/launch/rplidar.launch" />
+
+	<node name="obstacle_tracker" pkg="pauvsi_tracking" type="obstacle_tracker" output="screen" >
+
+	</node>
+
+</launch>

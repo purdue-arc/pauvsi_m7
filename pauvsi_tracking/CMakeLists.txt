@@ -89,6 +89,12 @@ add_executable(roomba_tracker src/pauvsi_tracking.cpp)
 target_link_libraries(tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES})
 target_link_libraries(roomba_tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES}  tracker)
 
+add_library(lidar_tracking include/pauvsi_tracking/rplidar.cpp)
+add_executable(obstacle_tracker src/obstacle_tracking.cpp)
+
+target_link_libraries(lidar_tracking ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES})
+target_link_libraries(obstacle_tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES} lidar_tracking)
+
 ## Declare a C++ library
 # add_library(pauvsi_tracking
 #   src/${PROJECT_NAME}/pauvsi_tracking.cpp
