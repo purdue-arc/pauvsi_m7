@@ -16,6 +16,8 @@ using cv::Moments;
 using cv::Point2f;
 using cv::Scalar;
 
+
+
 Tracker::Tracker()
 {
 	this->readROSParameters();
@@ -41,6 +43,31 @@ Tracker::Tracker()
 
 	ROS_DEBUG_STREAM("Done");
 
+}
+
+Tracker::Tracker(std::string cameraTopic, std::string cameraFrame, int ILOWHUE, int IHIGHHUE, int ILOWSATURATION, int IHIGHSATURATION,
+			int ILOWVALUE, int IHIGHVALUE)
+{
+	this->cameraTopic = cameraTopic;
+	this->camera_frame = cameraFrame;
+	this->world_frame = DEFAULT_WORLD_FRAME_NAME;
+	this->odom_frame = DEFAULT_ODOM_FRAME_NAME;
+	this->ILOWHUE = ILOWHUE;
+	this->IHIGHHUE = IHIGHHUE;
+	this->ILOWSATURATION = ILOWSATURATION;
+	this->IHIGHSATURATION = IHIGHSATURATION;
+	this->ILOWVALUE = ILOWVALUE;
+	this->IHIGHVALUE = IHIGHVALUE;
+
+	image_transport::ImageTransport it(nh);
+
+	this->cameraSub = it.subscribeCamera(this->getCameraTopic(), 1, &Tracker::cameraCallback, this);
+
+	ROS_DEBUG_STREAM(cameraSub.getInfoTopic());
+	ROS_DEBUG_STREAM(cameraSub.getTopic());
+	ROS_DEBUG_STREAM(cameraSub.getTransport());
+
+	ROS_DEBUG_STREAM("Done");
 }
 
 

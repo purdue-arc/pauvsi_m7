@@ -54,7 +54,8 @@ class Tracker
  public:
 
 	Tracker(void);
-
+	Tracker(std::string cameraTopic, std::string cameraFrame, int ILOWHUE, int IHIGHHUE, int ILOWSATURATION, int IHIGHSATURATION,
+			int ILOWVALUE, int IHIGHVALUE);
 
 	//frames
 	std::string camera_frame;
