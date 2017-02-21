@@ -299,7 +299,7 @@ void Tracker::getWorldPosition()
 	}
 	*/
 	//Positions of roombas in world Coordinate frame
-	vector<tf::Vector3> worldRoombaPosition;
+//	vector<tf::Vector3> worldRoombaPosition;
 	//vector along line [a b c]
 	tf::Vector3 lineVector;
 	// parameter t for line vector
@@ -359,6 +359,11 @@ void Tracker::getWorldPosition()
 //								buffer));
 	}
 
+}
+
+std::vector<tf::Vector3> Tracker::getPoses()
+{
+	return worldRoombaPosition;
 }
 
 /*

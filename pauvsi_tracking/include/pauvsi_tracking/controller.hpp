@@ -49,16 +49,20 @@
 #define GREENILOWVALUE 0
 #define GREENIHIGHVALUE 255
 
-
+#define SPACE_BETWEEN_ROOMBA 0.2
 
 class Controller
 {
 public:
 	Controller();
+	void removeCopies();
+
 
 private:
 	Tracker redObjectTrackers[5];
 	Tracker greenObjectTrackers[5];
 	KalmanFilter kFilter[10];
+	std::list<tf::Vector3> uniqueRedPoses;
+	std::list<tf::Vector3> uniqueGreenPoses;
 
 };

@@ -85,6 +85,8 @@ class Tracker
 
 	void getWorldPosition();
 
+	std::vector<tf::Vector3> getPoses();
+
 	//For visualizing
 	void displayTargets();
 
@@ -104,6 +106,7 @@ class Tracker
 	ros::Publisher roombaPos;
 	cv::Mat inputImg;
 	std::string cameraTopic;
+	std::vector<tf::Vector3> worldRoombaPosition;
 
 	//(x,y) positions of Roombas within image
 	std::vector<cv::Point2f> roombaPoses;
