@@ -21,7 +21,9 @@
 #include <ros/publisher.h>
 #include <vector>
 #include <string.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 
+#define ROOMBA_HEIGHT 0.09
 /*
  * If you don't get new measurements, do the prediction step but only change the error covariance once:
  * 1. x = fx(t-1)
@@ -45,7 +47,9 @@ class KalmanFilter
 	void init(double t0, const Eigen::VectorXd& x0);
 
 	void predict();
-	void update(const Eigen::VectorXd& y);
+	void update(const Eigen::MatrixXd& y);
+	geometry_msgs::PoseWithCovarianceStamped getPoseWithCovariance();
+	geometry_msgs::PoseStamped getPoseStamped();
 
  private:
 	 /**
@@ -74,6 +78,7 @@ class KalmanFilter
 	//Is filter initialized?
 	bool initialized;
 
+	Eigen::Matrix<double, 4, 1> x_hat, x_hat_new;
 	//Estimated States
-	Eigen::VectorXd x_hat, x_hat_new;
+//	Eigen::VectorXd x_hat, x_hat_new;
 };

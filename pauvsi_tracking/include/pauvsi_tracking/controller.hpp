@@ -8,6 +8,7 @@
 #include "opencv2/imgproc.hpp"
 #include "opencv2/highgui.hpp"
 #include <stdio.h>
+#include <eigen3/Eigen/Geometry>
 #include <boost/lexical_cast.hpp>
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
@@ -56,7 +57,7 @@ class Controller
 public:
 	Controller();
 	void removeCopies();
-
+	void updateKF();
 
 private:
 	Tracker redObjectTrackers[5];

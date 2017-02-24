@@ -139,3 +139,38 @@ void Controller::removeCopies()
 
 
 }
+
+void Controller::updateKF()
+{
+	//Go through unique poses, find matching positions and update the Kalman Filters
+	//What if I don't get a measurement for a roomba? ANS: Find out through empty list
+	kFilter[0].getPoseStamped();
+	float min = FLT_MAX;
+	std::list<tf::Vector3>::iterator pos;
+	float displacement;
+	geometry_msgs::PoseStamped currPose;
+
+	for(int i=0; i<5; ++i)
+	{
+		if(uniqueRedPoses.empty())
+			break;
+
+		currPose = kFilter[i].getPoseStamped();
+		std::list<tf::Vector3>::iterator it = uniqueRedPoses.begin();
+
+		while(it != uniqueRedPoses.end())
+		{
+			displacement = (currPose.pose.position.x - (*it).getX())*(currPose.pose.position.x - (*it).getX()) +
+					   (currPose.pose.position.x - (*it).getY())*(currPose.pose.position.x - (*it).getY());
+			if(displacement < min)
+			{
+				min = displacement;
+				pos = it;
+			}
+
+				++it;
+		}
+		kFilter[i].update(Eigen::Matrix<double, 2, 1>((*pos).getX(), (*pos).getY()));
+		uniqueRedPoses.erase(pos);
+	}
+}
