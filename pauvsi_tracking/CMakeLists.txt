@@ -95,6 +95,10 @@ add_executable(obstacle_tracker src/obstacle_tracking.cpp)
 target_link_libraries(lidar_tracking ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES})
 target_link_libraries(obstacle_tracker ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES} lidar_tracking)
 
+add_library(controller include/pauvsi_tracking/controller.cpp)
+
+target_link_libraries(controller ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES})
+
 ## Declare a C++ library
 # add_library(pauvsi_tracking
 #   src/${PROJECT_NAME}/pauvsi_tracking.cpp

@@ -29,14 +29,9 @@
 #include <ros/publisher.h>
 #include <vector>
 #include <string.h>
+#include <std_msgs/Header.h>
 
 #define CANNY_THRESHOLD 100
-#define REDILOWHUE 0
-#define	REDIHIGHHUE 179
-#define REDILOWSATURATION 0
-#define REDIHIGHSATURATION 255
-#define REDILOWVALUE 0
-#define REDIHIGHVALUE 255
 #define ROOMBA_HEIGHT 0.09
 #define DEFAULT_CAMERA_TOPIC "/camera/image"
 #define DEFAULT_ODOM_FRAME_NAME "odom"
@@ -79,6 +74,11 @@ class Tracker
 		D = _D;
 	}
 
+	std_msgs::Header getHeader()
+	{
+		return imageHeader;
+	}
+
 	void createTrackBars();
 
 	void run();
@@ -103,6 +103,7 @@ class Tracker
 	int IHIGHVALUE;
 	ros::NodeHandle nh;
 	image_transport::CameraSubscriber cameraSub;
+	std_msgs::Header imageHeader;
 	ros::Publisher roombaPos;
 	cv::Mat inputImg;
 	std::string cameraTopic;

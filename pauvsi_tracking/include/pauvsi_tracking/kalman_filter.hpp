@@ -22,6 +22,7 @@
 #include <vector>
 #include <string.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <std_msgs/Header.h>
 
 #define ROOMBA_HEIGHT 0.09
 /*
@@ -44,10 +45,10 @@ class KalmanFilter
 
 	KalmanFilter();
 
-	void init(double t0, const Eigen::VectorXd& x0);
+	void init(double t0, const Eigen::Matrix<double, 4, 1>& x0);
 
 	void predict();
-	void update(const Eigen::MatrixXd& y);
+	void update(const Eigen::MatrixXd& y, std_msgs::Header imageHeader);
 	geometry_msgs::PoseWithCovarianceStamped getPoseWithCovariance();
 	geometry_msgs::PoseStamped getPoseStamped();
 
@@ -78,7 +79,12 @@ class KalmanFilter
 	//Is filter initialized?
 	bool initialized;
 
-	Eigen::Matrix<double, 4, 1> x_hat, x_hat_new;
 	//Estimated States
+	Eigen::Matrix<double, 4, 1> x_hat, x_hat_new;
+
+	//For Time Stamps
+	std_msgs::Header dataHeader;
 //	Eigen::VectorXd x_hat, x_hat_new;
 };
+
+#endif

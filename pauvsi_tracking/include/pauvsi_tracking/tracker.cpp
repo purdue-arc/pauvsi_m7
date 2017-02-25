@@ -67,6 +67,7 @@ Tracker::Tracker(std::string cameraTopic, std::string cameraFrame, int ILOWHUE, 
 	ROS_DEBUG_STREAM(cameraSub.getTopic());
 	ROS_DEBUG_STREAM(cameraSub.getTransport());
 
+
 	ROS_DEBUG_STREAM("Done");
 }
 
@@ -74,6 +75,7 @@ Tracker::Tracker(std::string cameraTopic, std::string cameraFrame, int ILOWHUE, 
 void Tracker::cameraCallback(const sensor_msgs::ImageConstPtr& img, const sensor_msgs::CameraInfoConstPtr& cam)
 {
 	//this->createTrackBars();
+	this->imageHeader =	img->header;
 	ROS_DEBUG_STREAM("Listening To Camera: In callback");
 	//set the K and D matrices
 	this->setK(get3x3FromVector(cam->K));

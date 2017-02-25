@@ -27,7 +27,7 @@ KalmanFilter::KalmanFilter(double dt,
 	x_hat(n); x_hat_new(n);
 }
 
-void KalmanFilter::init(double t0, const Eigen::VectorXd& x0)
+void KalmanFilter::init(double t0, const Eigen::Matrix<double, 4, 1>& x0)
 {
 	x_hat = x0;
 	P = P0;
@@ -50,7 +50,7 @@ void KalmanFilter::predict()
 
 }
 
-void KalmanFilter::update(const Eigen::MatrixXd& y)
+void KalmanFilter::update(const Eigen::MatrixXd& y, std_msgs::Header imageHeader)
 {
 	if(!initialized)
 	{
@@ -69,12 +69,15 @@ void KalmanFilter::update(const Eigen::MatrixXd& y)
 
 
 	t = t+dt;
+
+	dataHeader = imageHeader;
 }
 
 geometry_msgs::PoseStamped KalmanFilter::getPoseStamped()
 {
 	geometry_msgs::PoseStamped pose;// = new geometry_msgs::PoseStamped(x_hat[0], x_hat[1], 0);
-	pose.header.stamp = ros::Time(ros::Time(0));
+	//TODO: Set ros time, to the time of the image
+	pose.header = dataHeader;
 	pose.pose.position.x = x_hat(0, 0);
 	pose.pose.position.y = x_hat(1, 0);
 	pose.pose.position.z = ROOMBA_HEIGHT;
@@ -85,7 +88,8 @@ geometry_msgs::PoseStamped KalmanFilter::getPoseStamped()
 geometry_msgs::PoseWithCovarianceStamped KalmanFilter::getPoseWithCovariance()
 {
 	geometry_msgs::PoseWithCovarianceStamped pose;
-	pose.header.stamp =ros::Time(ros::Time(0));
+	pose.header = dataHeader;
+	//	pose.header.stamp =ros::Time(ros::Time(0));
 	pose.pose.pose.position.x = x_hat(0, 0);
 	pose.pose.pose.position.y = x_hat(1, 0);
 	pose.pose.pose.position.z = ROOMBA_HEIGHT;

@@ -1,5 +1,5 @@
-#ifndef PAUVSI_TRACKER_INCLUDE_CONTROLLER_H_
-#define PAUVSI_TRACKER_INCLUDE_CONTROLLER_H_
+//#ifndef PAUVSI_TRACKER_INCLUDE_CONTROLLER_H_
+//#define PAUVSI_TRACKER_INCLUDE_CONTROLLER_H_
 
 
 #include <opencv2/calib3d.hpp>
@@ -23,6 +23,11 @@
 #include <ros/publisher.h>
 #include <vector>
 #include <string.h>
+#include <iterator>
+#include <std_msgs/Header.h>
+
+#include "tracker.hpp"
+#include "kalman_filter.hpp"
 
 #define CAMERA_TOPIC_1 "/cameraBottom/image_color"
 #define CAMERA_TOPIC_2 "/cameraFront/image_color"
@@ -58,6 +63,7 @@ public:
 	Controller();
 	void removeCopies();
 	void updateKF();
+	void init();
 
 private:
 	Tracker redObjectTrackers[5];
@@ -65,5 +71,7 @@ private:
 	KalmanFilter kFilter[10];
 	std::list<tf::Vector3> uniqueRedPoses;
 	std::list<tf::Vector3> uniqueGreenPoses;
+	std_msgs::Header imageHeader;
+
 
 };
