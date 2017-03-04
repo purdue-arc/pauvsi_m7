@@ -99,6 +99,10 @@ add_library(controller include/pauvsi_tracking/controller.cpp)
 
 target_link_libraries(controller ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES})
 
+add_library(kalmanFilter include/pauvsi_tracking/kalman_filter.cpp)
+
+target_link_libraries(kalmanFilter ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${Eigen_LIBRARIES})
+
 ## Declare a C++ library
 # add_library(pauvsi_tracking
 #   src/${PROJECT_NAME}/pauvsi_tracking.cpp

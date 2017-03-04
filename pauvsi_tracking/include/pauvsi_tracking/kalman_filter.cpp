@@ -13,11 +13,12 @@ KalmanFilter::KalmanFilter(double dt,
 						   const Eigen::MatrixXd& R,
 						   const Eigen::MatrixXd& P)
 {
-	this->F(F);
-	this->H(H);
-	this->Q(Q);
-	this->R(R);
-	this->P0(P);
+	this->F = F;
+	this->H = H;
+	this->Q = Q;
+	this->R = R;
+	this->P0 = P;
+
 	this->dt = dt;
 	this->m = H.rows();
 	this->n = F.rows();
@@ -26,6 +27,7 @@ KalmanFilter::KalmanFilter(double dt,
 	I.setIdentity();
 	x_hat(n); x_hat_new(n);
 }
+
 
 void KalmanFilter::init(double t0, const Eigen::Matrix<double, 4, 1>& x0)
 {
@@ -61,7 +63,7 @@ void KalmanFilter::update(const Eigen::MatrixXd& y, std_msgs::Header imageHeader
 //	x_hat_new = F * x_hat;
 //	P = F*P*F.transpose() + Q;
 
-	Eigen::MatrixXd S = H*P*H.transponse() + R;
+	Eigen::MatrixXd S = H*P*H.transpose() + R;
 	K = P*H.transpose()*S.inverse();
 	x_hat_new += K*(y - H*x_hat_new);
 	P = (I - K*H)*P;
@@ -93,8 +95,18 @@ geometry_msgs::PoseWithCovarianceStamped KalmanFilter::getPoseWithCovariance()
 	pose.pose.pose.position.x = x_hat(0, 0);
 	pose.pose.pose.position.y = x_hat(1, 0);
 	pose.pose.pose.position.z = ROOMBA_HEIGHT;
-	pose.pose.covariance = P;
+	boost::array<double, 36ul> covar;
+	for(int i=0; i<36; ++i)
+		covar[i] = 0.001;
+	covar[0] = P(0,0); covar[1] = P(0, 1); covar[6] = P(1, 0); covar[7] = P(1, 1);
+
+	//Not certain about yaw
+	covar[5] = covar[11] = covar[17] = covar[23] = covar[29] = covar[35] = 1000;
+
+
+	pose.pose.covariance = covar;
 
 	return pose;
 
 }
+

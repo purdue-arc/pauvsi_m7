@@ -26,12 +26,55 @@ Controller::Controller()
 										GREENILOWSATURATION, GREENIHIGHSATURATION, GREENILOWVALUE, GREENIHIGHVALUE));
 
 	// INITIALIZE KALMAN FILTERS
+	//0-4 for red 5-9 green
 
 
-
-	this->imageHeader = redObjectTrackers[0].getHeader();
 
 	this->init();
+}
+
+void Controller::init()
+{
+	getReading();
+	removeCopies();
+	std::list<tf::Vector3>::iterator it = uniqueRedPoses.begin();
+
+	for(int i=0; i<5; ++i)
+	{
+		kFilter[i].update(Eigen::Matrix<double, 2, 1>((*it).getX(), (*it).getY()), imageHeader);
+		++it;
+	}
+
+	it = uniqueGreenPoses.begin();
+
+	for(int i=5; i<10; ++i)
+	{
+		kFilter[i].update(Eigen::Matrix<double, 2, 1>((*it).getX(), (*it).getY()), imageHeader);
+		++it;
+	}
+
+	return;
+
+}
+
+void Controller::getReading()
+{
+	std::vector<tf::Vector3> inp;
+	for(int i=0; i<5; ++i)
+	{
+		inp = redObjectTrackers[i].getPoses();
+		std::copy(inp.begin(), inp.end(), std::back_inserter(uniqueRedPoses));
+	}
+
+	this->imageHeader = redObjectTrackers[4].getHeader();
+
+
+	for(int i=0; i<5; ++i)
+	{
+		inp = greenObjectTrackers[i].getPoses();
+		std::copy(inp.begin(), inp.end(), std::back_inserter(uniqueGreenPoses));
+	}
+
 }
 
 //returns true if the first argument goes before the second argument in the strict weak ordering
@@ -255,7 +298,7 @@ void Controller::updateKF()
 
 	//Go through unique poses, find matching positions and update the Kalman Filters
 	//What if I don't get a measurement for a roomba? ANS: Find out through empty list
-	kFilter[0].getPoseStamped();
+
 	float min = FLT_MAX;
 	std::list<tf::Vector3>::iterator pos;
 	float displacement;
@@ -266,6 +309,7 @@ void Controller::updateKF()
 		if(uniqueRedPoses.empty())
 			break;
 
+		min = FLT_MAX;
 		currPose = kFilter[i].getPoseStamped();
 		std::list<tf::Vector3>::iterator it = uniqueRedPoses.begin();
 
@@ -292,6 +336,7 @@ void Controller::updateKF()
 		if(uniqueGreenPoses.empty())
 			break;
 
+		min = FLT_MAX;
 		currPose = kFilter[i].getPoseStamped();
 		std::list<tf::Vector3>::iterator it = uniqueGreenPoses.begin();
 
@@ -310,5 +355,11 @@ void Controller::updateKF()
 		kFilter[i].update(Eigen::Matrix<double, 2, 1>((*pos).getX(), (*pos).getY()), imageHeader);
 		uniqueGreenPoses.erase(pos);
 	}
+
+}
+
+
+void Controller::run()
+{
 
 }

@@ -64,8 +64,12 @@ public:
 	void removeCopies();
 	void updateKF();
 	void init();
+	void getReading();
+	void run();
 
 private:
+	ros::NodeHandle nh;
+	ros::Publisher posPub;
 	Tracker redObjectTrackers[5];
 	Tracker greenObjectTrackers[5];
 	KalmanFilter kFilter[10];
